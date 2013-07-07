@@ -39,7 +39,7 @@ def get_format(args, choices):
 
 
 def get_dataset(source):
-    table = tabular.Table('')
+    table = tabular.Table(notset=None)
     for path in get_file_list(source):
         with open(path) as fh:
             for record in parser.parse(fh):
@@ -54,9 +54,9 @@ def write(fh, dataset, format):
 def main():
     format_choices = [fmt.title for fmt in formats.available]
     argparser = argparse.ArgumentParser('irco-convert')
-    argparser.add_argument('-o', '--output', default='-')
     argparser.add_argument('-f', '--format', choices=format_choices)
     argparser.add_argument('source', nargs='+')
+    argparser.add_argument('output', default='-', nargs='?')
 
     args = argparser.parse_args()
 
