@@ -1,0 +1,10 @@
+# Automation
+Fabric==1.6.1
+pycrypto==2.6
+paramiko==1.10.1
+
+# Code linting
+flake8==2.0
+mccabe==0.2.1
+pep8==1.4.6
+pyflakes==0.7.3

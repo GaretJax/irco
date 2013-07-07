@@ -1,0 +1,5 @@
+include entry-points.ini
+include requirements.txt
+include requirements-dev.txt
+include fabfile.py
+graft docs
