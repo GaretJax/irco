@@ -1,1 +1,2 @@
-#tablib==0.9.11
+tablib-garetjax==0.9.12
+networkx==1.7
