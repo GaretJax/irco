@@ -51,7 +51,7 @@ def release():
         return
 
     # Get version
-    version = local('python setup.py --version', capture=True)
+    version = 'v{}'.format(local('python setup.py --version', capture=True))
     name = local('python setup.py --name', capture=True)
 
     # Tag
@@ -68,7 +68,7 @@ def release():
         print 'Aborting.'
         return
 
-    local('git tag -a v{} -m {}'.format(pipes.quote(version),
+    local('git tag -a {} -m {}'.format(pipes.quote(version),
                                        pipes.quote(tag_message)))
 
     # Push
