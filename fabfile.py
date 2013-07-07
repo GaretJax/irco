@@ -22,6 +22,14 @@ def lint():
 
 
 @task
+def authors():
+    """
+    Updates the AUTHORS file with a list of committers from GIT.
+    """
+    local('git shortlog -s -e -n | cut -f 2- > AUTHORS')
+
+
+@task
 def release():
     """
     Create a new release and upload it to PyPI.
@@ -29,6 +37,17 @@ def release():
 
     if not is_working_tree_clean():
         print 'Your working tree is not clean. Refusing to create a release.'
+        return
+
+    print 'Rebuilding the AUTHORS file to check for modifications...'
+    authors()
+
+    if not is_working_tree_clean():
+        print (
+            'Your working tree is not clean after the AUTHORS file was '
+            'rebuilt.'
+        )
+        print 'Please commit the changes before continuing.'
         return
 
     # Get version
