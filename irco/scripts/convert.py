@@ -56,7 +56,7 @@ def main():
     argparser = argparse.ArgumentParser('irco-convert')
     argparser.add_argument('-f', '--format', choices=format_choices)
     argparser.add_argument('source', nargs='+')
-    argparser.add_argument('output', default='-', nargs='?')
+    argparser.add_argument('output')
 
     args = argparser.parse_args()
 
