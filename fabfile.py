@@ -7,8 +7,10 @@ from fabric.contrib.console import confirm
 def is_working_tree_clean():
     with settings(hide('everything'), warn_only=True):
         local('git update-index -q --ignore-submodules --refresh')
-        unstaged = local('git diff-files --quiet --ignore-submodules --', capture=True)
-        uncommitted = local('git diff-index --cached --quiet HEAD --ignore-submodules --', capture=True)
+        unstaged = local('git diff-files --quiet --ignore-submodules --',
+                         capture=True)
+        uncommitted = local('git diff-index --cached --quiet HEAD '
+                            '--ignore-submodules --', capture=True)
     return unstaged.succeeded and uncommitted.succeeded
 
 
@@ -17,8 +19,8 @@ def lint():
     """
     Checks the source code using flake8.
     """
-    local('flake8 --statistics --exit-zero --max-complexity=10 --benchmark '
-          '--exclude=\'*/migrations/*\' csat')
+    local('flake8 --statistics --exit-zero --max-complexity=10 '
+          '--exclude=\'*/migrations/*,build,dist\' .')
 
 
 @task
