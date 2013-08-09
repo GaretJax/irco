@@ -112,8 +112,9 @@ class Parser(object):
                     record.append(line)
 
         if record:
-            record = self.parse_record(record_id, record)
-            yield self.postprocess_record(record)
+            if not records or record_id in records:
+                record = self.parse_record(record_id, record)
+                yield self.postprocess_record(record)
 
     def parse(self, fh, records=None):
         return self.get_records(fh, records)
