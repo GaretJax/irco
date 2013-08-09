@@ -120,19 +120,19 @@ class Parser(object):
 
 
 class AuthorList(list):
-    def __str__(self):
-        return '; '.join(['{0.name} ({1})'.format(*a) for a in self])
+    def __unicode__(self):
+        return u'; '.join([u'{0.name} ({1})'.format(*a) for a in self])
 
 
 class Affiliations(dict):
-    def __str__(self):
-        return '; '.join(['({}) {}'.format(k, v) for k, v in self.iteritems()])
+    def __unicode__(self):
+        return u'; '.join([u'({}) {}'.format(k, v) for k, v in self.iteritems()])
 
 
 class ValueParser(object):
     def authors(self, v):
         v = v.split('; ')
-        authors = (re.search('^(.*) \((\d+)\)$', a).groups() for a in v)
+        authors = (re.search(r'^(.*) \((\d+)\)$', a).groups() for a in v)
         authors = ((Author(a[0]), int(a[1])) for a in authors)
         return AuthorList(authors)
 
@@ -156,11 +156,11 @@ class RecordProcessor(object):
     def process(self, record):
         if 'corresponding_author' in record:
             self.get_affiliation(record)
+            record['corresponding_author'] = unicode(record['corresponding_author'])
 
         # Convert back to strings
-        record['authors'] = record['authors']
-        record['author_affiliation'] = record['author_affiliation']
-        record['corresponding_author'] = str(record['corresponding_author'])
+        #record['authors'] = record['authors']
+        #record['author_affiliation'] = record['author_affiliation']
 
         return record
 
