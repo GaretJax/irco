@@ -1,10 +1,30 @@
-import re
+import re, htmlentitydefs
 from irco.authors import Author
 
 
 class IgnoreField(Exception):
     pass
 
+def unescape(text):
+    def fixup(m):
+        text = m.group(0)
+        if text[:2] == "&#":
+            # character reference
+            try:
+                if text[:3] == "&#x":
+                    return unichr(int(text[3:-1], 16))
+                else:
+                    return unichr(int(text[2:-1]))
+            except ValueError:
+                pass
+        else:
+            # named entity
+            try:
+                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+            except KeyError:
+                pass
+        return text # leave as is
+    return re.sub("&#?\w+;", fixup, unicode(text))
 
 class Parser(object):
 
@@ -20,6 +40,7 @@ class Parser(object):
         return self.KEY_MAPPING.get(k, k)
 
     def get_value(self, k, v):
+        v = unescape(v)
         func = getattr(self.value_parser, k, lambda x: x)
         return func(v)
 
