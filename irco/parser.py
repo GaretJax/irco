@@ -138,7 +138,10 @@ class ValueParser(object):
 
     def author_affiliation(self, v):
         v = v.split('; ')
-        affiliations = (re.search('^\((\d+)\) (.*)$', a).groups() for a in v)
+        affiliations = []
+        for a in v:
+            match = re.search(r'^\((\d+)\) (.*)$', a)
+            affiliations.append(match.groups())
         affiliations = {int(k): v for k, v in affiliations}
         return Affiliations(affiliations)
 
