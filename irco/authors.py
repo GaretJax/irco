@@ -1,4 +1,5 @@
 import re
+from collections import Counter
 
 
 class NamePart(object):
@@ -24,19 +25,14 @@ class NamePart(object):
         if not isinstance(other, NamePart):
             return NotImplemented
 
-        n1, n2 = self.name, other.name
-
-        if n1 == n2:
-            return True
-
-        if n1.endswith('.') and n2.startswith(n1[:-1]):
-            return True
-
-        if n2.endswith('.') and n1.startswith(n2[:-1]):
+        if self.isabbrof(other) or other.isabbrof(self):
             return True
 
         return False
 
+    def isabbrof(self, other):
+        pattern = self.name.replace('.', '.+')
+        return re.match(pattern, other.name, re.I) is not None
 
 
 class Author(unicode):
@@ -53,16 +49,22 @@ class Author(unicode):
         return tuple(chunks)
 
     def split_chunk(self, chunk):
-        parts = [c.strip() for c in re.split(r'([. ]{1,2})', chunk)]
+        parts = [c.strip() for c in re.split(r'([. ]{1,2}(?!-))', chunk)]
 
-        if parts[-1] == '':
-            del parts[-1]
-        for i in range(len(parts) - 1, 0, -2):
-            parts[i-1] += parts[i]
-            del parts[i]
+        i = 0
+
+        while i < len(parts):
+            if not parts[i]:
+                del parts[i]
+            elif parts[i] == '.':
+                parts[i-1] += parts[i]
+                del parts[i]
+            else:
+                i += 1
 
         parts = [NamePart(p) for p in parts]
         parts = sorted(parts, key=lambda p: p.name)
+        #print parts
         return tuple(parts)
 
     def __unicode__(self):
@@ -81,13 +83,15 @@ class Author(unicode):
         if len(self.chunks) != len(other.chunks):
             return False
 
-        self_abbr = set([c for c in self.chunks if c.is_abbreviated()])
-        self_not_abbr = set(self.chunks) - self_abbr
+        self_abbr = Counter([c for c in self.chunks if c.is_abbreviated()])
+        self_not_abbr = Counter(self.chunks) - self_abbr
 
-        other = set(other.chunks)
+        other = Counter(other.chunks)
 
-        return (self._find_and_remove(self_not_abbr, other) and
-                self._find_and_remove(self_abbr, other))
+        r1 = self._find_and_remove(self_not_abbr, other)
+        r2 = self._find_and_remove(self_abbr, other)
+
+        return r1 and r2
 
     def __hash__(self):
         initials = ''.join(n.name[0] for n in self.chunks).lower()
@@ -95,16 +99,24 @@ class Author(unicode):
 
     def _find_and_remove(self, set1, set2):
         while set1:
-            n1 = set1.pop()
-            if n1 in set2:
-                set2.remove(n1)
-                continue
+            n1, c = set1.popitem()
+            if c > 1:
+                set1[n1] = c - 1
+            for n2 in set2:
+                if n1.is_abbreviated() ^ n2.is_abbreviated():
+                    continue
+                if n1 == n2:
+                    set2.subtract([n2])
+                    if not set2[n2]:
+                        del set2[n2]
+                    break
             else:
                 for n2 in set2:
                     if n1 == n2:
-                        set2.remove(n2)
+                        set2.subtract([n2])
+                        if not set2[n2]:
+                            del set2[n2]
                         break
                 else:
                     return False
-                continue
         return True
