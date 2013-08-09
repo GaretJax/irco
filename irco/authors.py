@@ -12,7 +12,7 @@ class NamePart(object):
         return self.name
 
     def __repr__(self):
-        return 'NamePart({!r})'.format(self.name)
+        return 'NamePart({!r})'.format(self.name.encode('utf-8'))
 
     def __ne__(self, other):
         return not (self == other)
@@ -38,15 +38,16 @@ class NamePart(object):
         return False
 
 
-class Author(str):
+
+class Author(unicode):
     def __init__(self, name):
-        match = re.match('^([^\(]+)(?:\(([^@]+@[^ ]+)\))?$', name)
+        match = re.match(r'^([^\(]+)(?:\(([^@]+@[^ ]+)\))?$', name)
         self.name, self.email = match.groups()
         self.chunks = self.split_name(self.name)
 
     def split_name(self, name):
         chunks = []
-        for c in name.split(', '):
+        for c in name.split(u', '):
             chunks += self.split_chunk(c)
         chunks = sorted(chunks, key=lambda p: p.name)
         return tuple(chunks)
