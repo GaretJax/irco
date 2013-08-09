@@ -115,8 +115,8 @@ class Parser(object):
             record = self.parse_record(record_id, record)
             yield self.postprocess_record(record)
 
-    def parse(self, fh):
-        return self.get_records(fh)
+    def parse(self, fh, records=None):
+        return self.get_records(fh, records)
 
 
 class AuthorList(list):
