@@ -176,6 +176,16 @@ class RecordProcessor(object):
                 affiliation = record['author_affiliation'][affiliation]
                 break
         else:
+            p = max(len(corresponding_author) + 5, 50)
+            print '=' * 80
+            print 'No affiliation for record {}, ignoring'.format(record['id'])
+            print ' Corresponding author:'
+            print '    {0:{1}s} {0!r}'.format(corresponding_author, p)
+            print ' Possible candidates:'
+            for a in record['authors']:
+                print '    {0:{1}s} {0!r}'.format(a[0], p)
+            print '=' * 80
+            return
             raise ValueError('Could not find the corresponding author '
                              'affiliation in record {}'.format(record['id']))
 
