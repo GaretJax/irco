@@ -38,11 +38,11 @@ def get_format(args, choices):
     return format
 
 
-def get_dataset(source):
+def get_dataset(source, records=None):
     table = tabular.Table(notset=None)
     for path in get_file_list(source):
         with open(path) as fh:
-            for record in parser.parse(fh):
+            for record in parser.parse(fh, records):
                 table.add(record)
     return table.dataset()
 
@@ -55,13 +55,18 @@ def main():
     format_choices = [fmt.title for fmt in formats.available]
     argparser = argparse.ArgumentParser('irco-convert')
     argparser.add_argument('-f', '--format', choices=format_choices)
+    argparser.add_argument('-r', '--records')
     argparser.add_argument('source', nargs='+')
     argparser.add_argument('output')
 
     args = argparser.parse_args()
 
+    if args.records:
+        records = [int(r.strip()) for r in args.records.split(',')]
+    else:
+        records = None
     format = get_format(args, format_choices)
-    dataset = get_dataset(args.source)
+    dataset = get_dataset(args.source, records)
 
     if args.output == '-':
         write(sys.stdout, dataset, format)

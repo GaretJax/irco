@@ -84,17 +84,26 @@ class Parser(object):
             print
             raise
 
-    def get_records(self, fh):
+    def get_records(self, fh, records=None):
         record = None
         record_id = None
+
+        if records:
+            records = set(records)
 
         for line in fh:
             match = re.match(r'<RECORD (\d+)>', line)
             if match is not None:
                 next_record_id = int(match.group(1))
                 if next_record_id > 1:
-                    record = self.parse_record(record_id, record)
-                    yield self.postprocess_record(record)
+                    if not records or record_id in records:
+                        try:
+                            record = self.parse_record(record_id, record)
+                        except:
+                            raise
+                            print 'Could not parse record', record_id
+                        else:
+                            yield self.postprocess_record(record)
                 record = []
                 record_id = next_record_id
             else:
@@ -169,5 +178,5 @@ class RecordProcessor(object):
         record['corresponding_author_affiliation'] = affiliation
 
 
-def parse(fh):
-    return Parser(ValueParser(), RecordProcessor()).parse(fh)
+def parse(fh, records=None):
+    return Parser(ValueParser(), RecordProcessor()).parse(fh, records)
