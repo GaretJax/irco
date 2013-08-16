@@ -24,6 +24,9 @@ def create(dataset):
     collaborations_count = collections.Counter()
 
     for authors, affiliations in izip(coauthors, affiliation_sets):
+        if affiliations is None:
+            continue
+
         author_names = []
         for author, affiliation_id in authors:
             affiliation = affiliations[str(affiliation_id)]

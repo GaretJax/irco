@@ -22,6 +22,8 @@ def create(dataset):
 
     # Create graph
     for paper in affiliation_sets:
+        if paper is None:
+            continue
         countries = get_countries(paper.itervalues())
         g.add_nodes_from(countries)
         papers_count.update(countries)
