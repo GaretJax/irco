@@ -31,7 +31,7 @@ class NamePart(object):
         return False
 
     def isabbrof(self, other):
-        pattern = self.name.replace('.', '.+')
+        pattern = re.escape(self.name).replace('\.', '.+')
         return re.match(pattern, other.name, re.I) is not None
 
 
