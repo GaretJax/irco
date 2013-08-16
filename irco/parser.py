@@ -1,5 +1,8 @@
-import re, htmlentitydefs
+import re
+import htmlentitydefs
+
 from irco.authors import Author
+from irco import errors
 
 
 class IgnoreField(Exception):
@@ -142,6 +145,8 @@ class ValueParser(object):
         affiliations = []
         for a in v:
             match = re.search(r'^\((\d+)\) (.*)$', a)
+            if match is None:
+                continue
             affiliations.append(match.groups())
         affiliations = {int(k): v for k, v in affiliations}
         return Affiliations(affiliations)
@@ -158,38 +163,42 @@ class ValueParser(object):
 
 class RecordProcessor(object):
     def process(self, record):
-        if 'corresponding_author' in record:
-            self.get_affiliation(record)
-            record['corresponding_author'] = unicode(record['corresponding_author'])
-
-        # Convert back to strings
-        #record['authors'] = record['authors']
-        #record['author_affiliation'] = record['author_affiliation']
+        try:
+            record['corresponding_author'] = unicode(self.get_affiliation(record))
+        except (errors.NoCorrespondingAuthor, errors.NoAffiliationField,
+                errors.NoAffiliationMatch):
+            pass
 
         return record
 
     def get_affiliation(self, record):
-        corresponding_author = record['corresponding_author']
+        try:
+            corresponding_author = record['corresponding_author']
+        except KeyError:
+            raise errors.NoCorrespondingAuthor(record)
+
+        try:
+            affiliations = record['author_affiliation']
+        except KeyError:
+            raise errors.NoAffiliationField(record)
 
         for author, affiliation in record['authors']:
             if corresponding_author == author:
-                affiliation = record['author_affiliation'][affiliation]
+                affiliation = affiliations[affiliation]
                 break
         else:
             p = max(len(corresponding_author) + 5, 50)
             print '=' * 80
             print 'No affiliation for record {}, ignoring'.format(record['id'])
             print ' Corresponding author:'
-            print '    {0:{1}s} {0!r}'.format(corresponding_author, p)
+            print u'    {0:{1}s} {0!r}'.format(corresponding_author, p)
             print ' Possible candidates:'
             for a in record['authors']:
-                print '    {0:{1}s} {0!r}'.format(a[0], p)
+                print u'    {0:{1}s} {0!r}'.format(a[0], p)
             print '=' * 80
-            return
-            raise ValueError('Could not find the corresponding author '
-                             'affiliation in record {}'.format(record['id']))
+            raise errors.NoAffiliationMatch(record)
 
-        record['corresponding_author_affiliation'] = affiliation
+        return affiliation
 
 
 def parse(fh, records=None):
