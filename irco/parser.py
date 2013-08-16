@@ -8,6 +8,7 @@ from irco import errors
 class IgnoreField(Exception):
     pass
 
+
 def unescape(text):
     def fixup(m):
         text = m.group(0)
@@ -26,8 +27,9 @@ def unescape(text):
                 text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
             except KeyError:
                 pass
-        return text # leave as is
+        return text  # leave as is
     return re.sub("&#?\w+;", fixup, unicode(text))
+
 
 class Parser(object):
 
@@ -130,7 +132,8 @@ class AuthorList(list):
 
 class Affiliations(dict):
     def __unicode__(self):
-        return u'; '.join([u'({}) {}'.format(k, v) for k, v in self.iteritems()])
+        affiliations = [u'({}) {}'.format(k, v) for k, v in self.iteritems()]
+        return u'; '.join(affiliations)
 
 
 class ValueParser(object):
@@ -164,7 +167,8 @@ class ValueParser(object):
 class RecordProcessor(object):
     def process(self, record):
         try:
-            record['corresponding_author'] = unicode(self.get_affiliation(record))
+            record['corresponding_author'] = unicode(
+                self.get_affiliation(record))
         except (errors.NoCorrespondingAuthor, errors.NoAffiliationField,
                 errors.NoAffiliationMatch):
             pass
