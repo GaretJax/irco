@@ -188,6 +188,8 @@ class RecordProcessor(object):
 
         for author, affiliation in record['authors']:
             if corresponding_author == author:
+                if affiliation == 0:
+                    continue
                 affiliation = affiliations[affiliation]
                 break
         else:

@@ -29,6 +29,8 @@ def create(dataset):
 
         author_names = []
         for author, affiliation_id in authors:
+            if affiliation_id == 0:
+                continue
             affiliation = affiliations[str(affiliation_id)]
             country = get_country(affiliation)
             countries.add(country)
