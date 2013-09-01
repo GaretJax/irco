@@ -45,7 +45,7 @@ class Setup(object):
 
 
 setup(name='irco',
-      version='0.4',
+      version='0.5',
       description='International Research Collaboration Graphs',
       author='Jonathan Stoppani',
       author_email='jonathan@stoppani.name',
