@@ -1,15 +1,78 @@
 import itertools
 import collections
 
+import pycountry
 import networkx as nx
 
 
+_countries = {}
+
+
+PREFIXES = set(['Republic of', ])
+NAMES = {c.name.lower(): c for c in pycountry.countries.objects}
+
+
+class CountryNotFound(Exception):
+    def __init__(self, token, text):
+        self.token = token
+        self.text = text
+
+    def __unicode__(self):
+        return (u'Fuzzy search for "{}" returned no results (complete record: '
+                '"{}")'.format(self.token, self.text))
+
+
+_countries = {}
+
+
 def get_country(text):
-    return text.rsplit(', ')[-1]
+    tokens = text.split(', ')
+
+    country_token = tokens[-1]
+
+    if country_token in PREFIXES:
+        country_token = tokens[-2] + ', ' + tokens[-1]
+
+    if country_token not in _countries:
+        country = None
+        try:
+            country = pycountry.countries.get(name=country_token)
+        except KeyError:
+            try:
+                country = pycountry.countries.get(name=country_token)
+            except KeyError:
+                cl = country_token.lower()
+                for k, country in NAMES.iteritems():
+                    v = country.name.lower()
+                    if cl in v or v in cl:
+                        break
+                    if country.alpha3 in country_token.split(' '):
+                        break
+                    if country.alpha2 in country_token.split(' '):
+                        break
+                else:
+                    country = None
+            if country:
+                print 'Fuzzy search for "{}" matched "{}"'.format(
+                    country_token, country.name)
+            else:
+                raise CountryNotFound(country_token, text)
+
+        _countries[country_token] = country.name
+
+    return _countries[country_token]
 
 
 def get_countries(affiliations):
-    return set(get_country(a) for a in affiliations)
+    countries = set()
+
+    for a in affiliations:
+        try:
+            countries.add(get_country(a))
+        except CountryNotFound as e:
+            print unicode(e)
+
+    return countries
 
 
 def create(dataset):
