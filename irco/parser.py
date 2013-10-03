@@ -101,14 +101,9 @@ class Parser(object):
             if match is not None:
                 next_record_id = int(match.group(1))
                 if next_record_id > 1:
-                    if not records or record_id in records:
-                        try:
-                            record = self.parse_record(record_id, record)
-                        except:
-                            raise
-                            print 'Could not parse record', record_id
-                        else:
-                            yield self.postprocess_record(record)
+                    record = self.process_record(records, record_id, record)
+                    if record:
+                        yield record
                 record = []
                 record_id = next_record_id
             else:
@@ -117,9 +112,20 @@ class Parser(object):
                     record.append(line)
 
         if record:
-            if not records or record_id in records:
+            record = self.parse_record(record_id, record)
+            if record:
+                yield record
+
+    def process_record(self, records, record_id, record):
+
+        if not records or record_id in records:
+            try:
                 record = self.parse_record(record_id, record)
-                yield self.postprocess_record(record)
+            except:
+                raise
+                print 'Could not parse record', record_id
+            else:
+                return self.postprocess_record(record)
 
     def parse(self, fh, records=None):
         return self.get_records(fh, records)

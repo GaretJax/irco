@@ -1,6 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Unicode, ForeignKey
-from sqlalchemy import UnicodeText
+from sqlalchemy import Column, Integer, String, Unicode, ForeignKey, Text
 from sqlalchemy.orm import relationship, backref
 
 
@@ -44,14 +43,18 @@ class AffiliatedAuthor(Base):
 class Publication(Base):
     __tablename__ = 'publication'
 
+    # Basic attributes
     id = Column(Integer, primary_key=True)
     title = Column(Unicode(120), nullable=False)
     year = Column(Integer)
 
-    unparsed_record_type = Column(String(20))
-    unparsed_record = Column(UnicodeText())
-
+    # Relationships
     authors = relationship(
         AffiliatedAuthor,
         backref=backref('publication', order_by=AffiliatedAuthor.order)
     )
+
+    # Bookkeping metadata
+    unique_source_id = Column(String(64), nullable=False, unique=True)
+    unparsed_record_format = Column(String(20))
+    unparsed_record_value = Column(Text())
