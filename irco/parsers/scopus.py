@@ -32,7 +32,8 @@ class Tokenizer(base.Tokenizer):
         self.stream = stream
         self.line = 2
         self.reader = csv.DictReader(stream)
-        self.reader.fieldnames = [self._get_key(f) for f in self.reader.fieldnames]
+        self.reader.fieldnames = [self._get_key(f) for f in
+                                  self.reader.fieldnames]
         return self
 
     def __iter__(self):
@@ -95,7 +96,7 @@ class AffiliationsProcessor(base.Processor):
                 institution = chunks[2]
                 if institution not in institutions:
                     institutions[institution] = i
-                    i+= 1
+                    i += 1
 
                 affiliation = institutions[institution]
             else:

@@ -44,6 +44,7 @@ def institutions():
     }
     return render_template('institutions/index.html', **context)
 
+
 @app.route('/institutions/<int:institution_id>/')
 def institution(institution_id):
     session = db.Session()

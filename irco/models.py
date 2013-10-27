@@ -71,7 +71,6 @@ class Person(Base):
         return self.get_authors(object_session(self))
 
 
-
 class Publication(Base):
     __tablename__ = 'publication'
 
@@ -98,7 +97,6 @@ class Publication(Base):
     @property
     def authors(self):
         return self.get_authors(object_session(self))
-
 
     # Bookkeping metadata
     unique_source_id = Column(String(64), nullable=False, unique=True)
