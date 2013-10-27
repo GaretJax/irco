@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from irco import models, utils
-from irco.parsers import compendex, scopus
+from irco.parsers import scopus
 
 
 def get_records(source, pipeline):
@@ -69,8 +69,6 @@ def main():
     argparser.add_argument('-i', '--input-format')
     argparser.add_argument('source', nargs='+')
     argparser.add_argument('database')
-
-    args = argparser.parse_args()
 
     args = argparser.parse_args()
     engine = create_engine(args.database, echo=args.verbose)
