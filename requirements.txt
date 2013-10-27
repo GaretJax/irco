@@ -8,4 +8,5 @@ itsdangerous==0.23
 networkx==1.7
 pycountry==0.19
 requests==1.2.3
+structlog==0.3.2
 tablib-garetjax==0.9.12
