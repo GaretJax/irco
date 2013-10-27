@@ -53,11 +53,11 @@ def import_records(engine, records):
             affiliated_author = models.AffiliatedAuthor(
                 order=1,
                 unparsed_institution_name=raw,
-                affiliation=institution,
+                institution=institution,
                 unparsed_person_name=name,
                 author=author,
+                publication=publication,
             )
-            publication.authors.append(affiliated_author)
             session.add(affiliated_author)
 
         session.commit()

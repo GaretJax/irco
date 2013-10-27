@@ -12,6 +12,7 @@ class Tokenizer(base.Tokenizer):
         value = '\n'.join(lines)
         record = base.Record(self.FORMAT, value)
         record.source = (stream.name, line)
+        return record
 
     def tokenize(self, stream):
         record = []
