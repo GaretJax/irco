@@ -12,6 +12,15 @@ Contents:
    :maxdepth: 2
 
 
+News
+====
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   news/*
+
 
 Indices and tables
 ==================

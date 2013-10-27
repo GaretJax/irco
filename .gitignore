@@ -5,3 +5,4 @@
 /dist
 /testdata
 test.db
+/docs/_build
