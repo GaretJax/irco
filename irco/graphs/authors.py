@@ -36,16 +36,16 @@ def create(session):
     for author in session.query(models.Person):
         country = get_country(author)
         countries.add(country)
-        g.add_node(author.id, label=author.name, affiliation_country=country)
+        g.add_node(author.name, affiliation_country=country)
 
     for publication in session.query(models.Publication):
-        author_ids = []
+        author_names = []
 
         for author in publication.authors:
-            papers_count[author.id] += 1
-            author_ids.append(author.id)
+            papers_count[author.name] += 1
+            author_names.append(author.name)
 
-        collaborations = list(combinations(author_ids, 2))
+        collaborations = list(combinations(author_names, 2))
         collaborations_count.update(collaborations)
         g.add_edges_from(collaborations)
 
