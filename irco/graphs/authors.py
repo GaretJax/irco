@@ -1,50 +1,57 @@
 import collections
-from itertools import izip, combinations
+from itertools import combinations
 
 import networkx as nx
 
-
-def get_country(text):
-    return text.rsplit(', ')[-1]
+from irco import models
 
 
-def get_countries(affiliations):
-    return set(get_country(a) for a in affiliations)
+NO_COUNTRY = '<no country>'
 
 
-def create(dataset):
+def get_country(author):
+    def extract_country(institution):
+        return institution.name.rsplit(',', 1)[-1].strip().lower()
+
+    countries = [extract_country(i) for i in author.institutions]
+
+    if len(countries) == 1:
+        country = countries[0]
+    elif countries:
+        countries = collections.Counter(countries)
+        country = countries.most_common(1)[0]
+    else:
+        country = NO_COUNTRY
+
+    return country
+
+
+def create(session):
     g = nx.Graph()
 
-    coauthors = dataset['authors']
-    affiliation_sets = dataset['author_affiliation']
-
     countries = set()
-
     papers_count = collections.Counter()
     collaborations_count = collections.Counter()
 
-    for authors, affiliations in izip(coauthors, affiliation_sets):
-        if affiliations is None:
-            continue
+    for author in session.query(models.Person):
+        country = get_country(author)
+        countries.add(country)
+        g.add_node(author.id, label=author.name, affiliation_country=country)
 
-        author_names = []
-        for author, affiliation_id in authors:
-            if affiliation_id == 0:
-                continue
-            affiliation = affiliations[str(affiliation_id)]
-            country = get_country(affiliation)
-            countries.add(country)
-            papers_count[author] += 1
-            g.add_node(author, affiliation_country=country)
-            author_names.append(author)
+    for publication in session.query(models.Publication):
+        author_ids = []
 
-        collaborations = list(combinations(author_names, 2))
+        for author in publication.authors:
+            papers_count[author.id] += 1
+            author_ids.append(author.id)
+
+        collaborations = list(combinations(author_ids, 2))
         collaborations_count.update(collaborations)
         g.add_edges_from(collaborations)
 
     countries = {c: i for i, c in enumerate(countries)}
 
-    # Set papers count
+    # Set papers count and country index
     for author, count in papers_count.iteritems():
         n = g.node[author]
         n['papers'] = count
