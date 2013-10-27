@@ -1,3 +1,6 @@
 tablib-garetjax==0.9.12
 networkx==1.7
 pycountry==0.19
+SQLAlchemy==0.8.2
+ftfy==3.0.4
+requests==1.2.3

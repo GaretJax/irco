@@ -28,8 +28,7 @@ class AffiliatedAuthor(Base):
     order = Column(Integer, nullable=False)
 
     unparsed_institution_name = Column(Unicode(120))
-    institution_id = Column(Integer, ForeignKey('institution.id'),
-                            nullable=False)
+    institution_id = Column(Integer, ForeignKey('institution.id'))
     affiliation = relationship(Institution)
 
     unparsed_person_name = Column(Unicode(60), nullable=False)

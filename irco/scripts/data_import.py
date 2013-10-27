@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from irco import models, utils
-from irco.parsers import evillage
+from irco.parsers import compendex, scopus
 
 
 def get_records(source, pipeline):
@@ -44,10 +44,16 @@ def import_records(engine, records):
 
         for i, (name, affiliation) in enumerate(record['authors']):
             author = models.Person(name=name)
+
+            if affiliation is not None:
+                institution, raw = institutions[affiliation]
+            else:
+                institution, raw = None, None
+
             affiliated_author = models.AffiliatedAuthor(
                 order=1,
-                unparsed_institution_name=institutions[affiliation][1],
-                affiliation=institutions[affiliation][0],
+                unparsed_institution_name=raw,
+                affiliation=institution,
                 unparsed_person_name=name,
                 author=author,
             )
@@ -69,7 +75,7 @@ def main():
     args = argparser.parse_args()
     engine = create_engine(args.database, echo=args.verbose)
 
-    records = get_records(args.source, evillage.pipeline)
+    records = get_records(args.source, scopus.pipeline)
     import_records(engine, records)
 
     models.Base.metadata.create_all(engine)

@@ -6,19 +6,20 @@ from irco.authors import Author
 
 
 class Tokenizer(base.Tokenizer):
-    FORMAT = 'evillage-ascii'
+    FORMAT = 'compendex-ascii'
 
-    def _make_record(self, lines):
+    def _make_record(self, stream, line, lines):
         value = '\n'.join(lines)
-        return base.Record(self.FORMAT, value)
+        record = base.Record(self.FORMAT, value)
+        record.source = (stream.name, line)
 
     def tokenize(self, stream):
         record = []
 
-        for line in stream:
+        for i, line in enumerate(stream):
             if re.match(r'<RECORD (\d+)>', line) is not None:
                 if record:
-                    yield self._make_record(record)
+                    yield self._make_record(stream, i, record)
                 record = []
             else:
                 line = line.strip()
@@ -26,7 +27,7 @@ class Tokenizer(base.Tokenizer):
                     record.append(line)
 
         if record:
-            yield self._make_record(record)
+            yield self._make_record(stream, i, record)
 
 
 class Parser(base.Parser):
