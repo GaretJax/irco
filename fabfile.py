@@ -77,4 +77,4 @@ def release():
     local('git push --tags origin master')
 
     # Package and upload to pypi
-    local('python setup.py sdist upload')
+    local('python setup.py sdist bdist_wheel upload')
