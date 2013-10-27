@@ -1,6 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Unicode, ForeignKey, Text
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, object_session
+
 
 
 Base = declarative_base()
@@ -13,6 +14,24 @@ class Institution(Base):
     name = Column(Unicode(120), nullable=False)
     country = Column(Unicode(100))
 
+    def get_authors(self, session):
+        return (session.query(Person)
+                .join(AffiliatedAuthor)
+                .filter(AffiliatedAuthor.institution == self))
+
+    def get_publications(self, session):
+        return (session.query(Publication)
+                .join(AffiliatedAuthor)
+                .filter(AffiliatedAuthor.institution == self))
+
+    @property
+    def authors(self):
+        return self.get_authors(object_session(self))
+
+    @property
+    def publications(self):
+        return self.get_publications(object_session(self))
+
 
 class Person(Base):
     __tablename__ = 'person'
@@ -20,23 +39,24 @@ class Person(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode(60), nullable=False)
 
+    def get_institutions(self, session):
+        return (session.query(Institution)
+                .join(AffiliatedAuthor)
+                .filter(AffiliatedAuthor.author == self))
 
-class AffiliatedAuthor(Base):
-    __tablename__ = 'affiliated_author'
+    def get_publications(self, session):
+        return (session.query(Publication)
+                .join(AffiliatedAuthor)
+                .filter(AffiliatedAuthor.author == self))
 
-    id = Column(Integer, primary_key=True)
-    order = Column(Integer, nullable=False)
+    @property
+    def institutions(self):
+        return self.get_institutions(object_session(self))
 
-    unparsed_institution_name = Column(Unicode(120))
-    institution_id = Column(Integer, ForeignKey('institution.id'))
-    affiliation = relationship(Institution)
+    @property
+    def publications(self):
+        return self.get_authors(object_session(self))
 
-    unparsed_person_name = Column(Unicode(60), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'), nullable=False)
-    author = relationship(Person)
-
-    publication_id = Column(Integer, ForeignKey('publication.id'),
-                            nullable=False)
 
 
 class Publication(Base):
@@ -48,12 +68,45 @@ class Publication(Base):
     year = Column(Integer)
 
     # Relationships
-    authors = relationship(
-        AffiliatedAuthor,
-        backref=backref('publication', order_by=AffiliatedAuthor.order)
-    )
+    def get_institutions(self, session):
+        return (session.query(Institution)
+                .join(AffiliatedAuthor)
+                .filter(AffiliatedAuthor.publication == self))
+
+    @property
+    def institutions(self):
+        return self.get_institutions(object_session(self))
+
+    def get_authors(self, session):
+        return (session.query(Person)
+                .join(AffiliatedAuthor)
+                .filter(AffiliatedAuthor.publication == self))
+
+    @property
+    def authors(self):
+        return self.get_authors(object_session(self))
+
 
     # Bookkeping metadata
     unique_source_id = Column(String(64), nullable=False, unique=True)
     unparsed_record_format = Column(String(20))
     unparsed_record_value = Column(Text())
+
+
+class AffiliatedAuthor(Base):
+    __tablename__ = 'affiliated_author'
+
+    id = Column(Integer, primary_key=True)
+    order = Column(Integer, nullable=False)
+
+    unparsed_institution_name = Column(Unicode(120))
+    institution_id = Column(Integer, ForeignKey('institution.id'))
+    institution = relationship(Institution, backref='affiliations')
+
+    unparsed_person_name = Column(Unicode(60), nullable=False)
+    person_id = Column(Integer, ForeignKey('person.id'), nullable=False)
+    author = relationship(Person, backref='affiliations')
+
+    publication_id = Column(Integer, ForeignKey('publication.id'),
+                            nullable=False)
+    publication = relationship(Publication, backref='affiliations')

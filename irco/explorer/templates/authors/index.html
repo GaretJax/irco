@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+		<h1>Authors index</h1>
+		<p>{{ authors.count() }} authors</p>
+		<table border="1">
+			<thead>
+				<tr>
+					<th>Name</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for a in authors %}
+				<tr>
+					<td><a href="{{ url_for('author', author_id=a.id) }}">{{ a.name }}</a></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+{% endblock %}

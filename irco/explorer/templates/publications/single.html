@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+		<h1>{{ publication.title }}</h1>
+
+		<section>
+			<h2>Metadata</h2>
+			<table border="1">
+				<tr>
+					<th>Publication year</th>
+					<td>{{ publication.year }}</td>
+				</tr>
+			</table>
+		</section>
+
+		<section>
+			<h2>Authors</h2>
+			<table border="1">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Affiliation</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for affiliation in publication.affiliations %}
+					<tr>
+						<td><a href="{{ url_for('author', author_id=affiliation.author.id) }}">{{ affiliation.author.name }}</a></td>
+						<td><a href="{{ url_for('institution', institution_id=affiliation.institution.id) }}">{{ affiliation.institution.name }}</a></td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>Institutions</h2>
+			<table border="1">
+				<thead>
+					<tr>
+						<th>Name</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for institution in publication.institutions %}
+					<tr id="institution-{{ institution.id }}">
+						<td><a href="{{ url_for('institution', institution_id=institution.id) }}">{{ institution.name }}</a></td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>Source information</h2>
+			<dl>
+				<dt><acronym title="Unique Source Identifier">USID</acronym></dt>
+				<dd>{{ publication.unique_source_id }}</dd>
+				<dt>Record format</dt>
+				<dd>{{ publication.unparsed_record_format }}</dd>
+				<dt>Raw record</dt>
+				<dd>
+					<pre>{{ publication.unparsed_record_value }}</pre>
+				</dd>
+			</dl>
+		</section>
+{% endblock %}

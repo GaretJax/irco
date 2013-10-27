@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+		<h1>{{ institution.name }}</h1>
+
+		<section>
+			<h2>Metadata</h2>
+			<table border="1">
+				<tr>
+					<th>Country</th>
+					<td>{{ institution.country|default('-', true) }}</td>
+				</tr>
+			</table>
+		</section>
+
+		<section>
+			<h2>Authors</h2>
+			<table border="1">
+				<thead>
+					<tr>
+						<th>Name</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for author in institution.authors %}
+					<tr>
+						<td><a href="{{ url_for('author', author_id=author.id) }}">{{ author.name }}</a></td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>Publications</h2>
+			<table border="1">
+				<thead>
+					<tr>
+						<th>Title</th>
+						<th>Year</th>
+						<th>Authors</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for publication in institution.publications %}
+					<tr>
+						<td><a href="{{ url_for('publication', publication_id=publication.id) }}">{{ publication.title }}</a></td>
+						<td>{{ publication.year }}</td>
+						<td>
+							<ul>
+								{% for author in publication.authors %}
+								<li><a href="{{ url_for('author', author_id=author.id) }}">{{ author.name }}</a></li>
+								{% endfor %}
+							</ul>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</section>
+{% endblock %}

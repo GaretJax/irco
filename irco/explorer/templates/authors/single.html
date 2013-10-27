@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+		<h1>{{ author.name }}</h1>
+
+		<section>
+			<h2>Publications</h2>
+			<table border="1">
+				<thead>
+					<tr>
+						<th>Title</th>
+						<th>Year</th>
+						<th>Affiliation</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for affiliation in author.affiliations %}
+					<tr>
+						<td><a href="{{ url_for('publication', publication_id=affiliation.publication.id) }}">{{ affiliation.publication.title }}</a></td>
+						<td>{{ affiliation.publication.year }}</td>
+						<td><a href="{{ url_for('institution', institution_id=affiliation.institution.id) }}">{{ affiliation.institution.name }}</a></td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>Institutions</h2>
+			<table border="1">
+				<thead>
+					<tr>
+						<th>Name</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for institution in author.institutions %}
+					<tr id="institution-{{ institution.id }}">
+						<td><a href="{{ url_for('institution', institution_id=institution.id) }}">{{ institution.name }}</a></td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</section>
+{% endblock %}
