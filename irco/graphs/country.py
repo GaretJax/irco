@@ -1,15 +1,22 @@
+import sys
 import itertools
 import collections
 
 import pycountry
 import networkx as nx
 
+from irco import models, logging
+
+log = logging.get_logger()
 
 _countries = {}
 
 
 PREFIXES = set(['Republic of', ])
 NAMES = {c.name.lower(): c for c in pycountry.countries.objects}
+REPLACEMENTS = {
+    'South Korea': 'Korea, Republic of'
+}
 
 
 class CountryNotFound(Exception):
@@ -25,10 +32,14 @@ class CountryNotFound(Exception):
 _countries = {}
 
 
-def get_country(text):
+def get_country(institution):
+    text = institution.name
     tokens = text.split(', ')
 
     country_token = tokens[-1]
+
+    if country_token in REPLACEMENTS:
+        country_token = REPLACEMENTS[country_token]
 
     if country_token in PREFIXES:
         country_token = tokens[-2] + ', ' + tokens[-1]
@@ -53,7 +64,7 @@ def get_country(text):
                 else:
                     country = None
             if country:
-                print 'Fuzzy search for "{}" matched "{}"'.format(
+                print >>sys.stderr, 'Fuzzy search for "{}" matched "{}"'.format(
                     country_token, country.name)
             else:
                 raise CountryNotFound(country_token, text)
@@ -63,31 +74,26 @@ def get_country(text):
     return _countries[country_token]
 
 
-def get_countries(affiliations):
+def get_countries(publication):
     countries = set()
 
-    for a in affiliations:
+    for institution in publication.institutions:
         try:
-            countries.add(get_country(a))
+            countries.add(get_country(institution))
         except CountryNotFound as e:
-            print unicode(e)
+            print >>sys.stderr, unicode(e)
 
     return countries
 
 
-def create(dataset):
+def create(session):
     g = nx.Graph()
-
-    affiliation_sets = dataset['author_affiliation']
 
     papers_count = collections.Counter()
     collaborations_count = collections.Counter()
 
-    # Create graph
-    for paper in affiliation_sets:
-        if paper is None:
-            continue
-        countries = get_countries(paper.itervalues())
+    for publication in session.query(models.Publication):
+        countries = get_countries(publication)
         g.add_nodes_from(countries)
         papers_count.update(countries)
 
