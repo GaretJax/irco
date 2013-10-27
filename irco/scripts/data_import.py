@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from irco import models, utils
-from irco.parsers import scopus
+from irco.parsers import scopus, compendex
 
 
 def get_records(source, pipeline):
@@ -65,16 +65,24 @@ def import_records(engine, records):
 
 
 def main():
+    pipelines = {
+        'compendex': compendex.pipeline,
+        'scopus': scopus.pipeline,
+    }
+
     argparser = argparse.ArgumentParser('irco-import')
     argparser.add_argument('-v', '--verbose', action='store_true')
-    argparser.add_argument('-i', '--input-format')
+    argparser.add_argument('-i', '--input-format', choices=pipelines)
     argparser.add_argument('source', nargs='+')
     argparser.add_argument('database')
 
     args = argparser.parse_args()
+
+    pipeline = pipelines[args.input_format]
+
     engine = create_engine(args.database, echo=args.verbose)
 
-    records = get_records(args.source, scopus.pipeline)
+    records = get_records(args.source, pipeline)
     import_records(engine, records)
 
     models.Base.metadata.create_all(engine)
