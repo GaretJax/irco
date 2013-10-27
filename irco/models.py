@@ -1,10 +1,23 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Unicode, ForeignKey, Text
 from sqlalchemy.orm import relationship, object_session
-
+from sqlalchemy.sql.expression import ClauseElement
 
 
 Base = declarative_base()
+
+
+def get_or_create(session, model, defaults={}, **kwargs):
+    instance = session.query(model).filter_by(**kwargs).first()
+    if instance:
+        return instance, False
+    else:
+        params = {k: v for k, v in kwargs.iteritems()
+                  if not isinstance(v, ClauseElement)}
+        params.update(defaults)
+        instance = model(**params)
+        session.add(instance)
+        return instance, True
 
 
 class Institution(Base):

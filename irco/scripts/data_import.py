@@ -38,9 +38,10 @@ def import_records(engine, records):
         institutions = {}
 
         for k, v in record['institutions'].iteritems():
-            instance = models.Institution(name=v)
+            instance, _ = models.get_or_create(
+                session, models.Institution, name=v
+            )
             institutions[k] = (instance, v)
-            session.add(instance)
 
         for i, (name, affiliation) in enumerate(record['authors']):
             author = models.Person(name=name)
