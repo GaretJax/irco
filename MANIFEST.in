@@ -3,3 +3,5 @@ include requirements.txt
 include requirements-dev.txt
 include fabfile.py
 graft docs
+graft irco/explorer/static
+graft irco/explorer/assets
