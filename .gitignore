@@ -1,8 +1,11 @@
 *.egg-info
 *.pyc
 *.log
+/.sass-cache
 /build
 /dist
 /testdata
 test.db
 /docs/_build
+/irco/explorer/static/styles
+/irco/explorer/static/scripts/*.js
