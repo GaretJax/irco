@@ -73,6 +73,8 @@ yet (except this page), but that's the next task on my todo list.
 You can always find it at this address: http://irco.readthedocs.org/
 
 
+.. _irco-explorer-news:
+
 IRCO Explorer
 -------------
 
