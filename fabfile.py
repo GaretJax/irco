@@ -24,6 +24,16 @@ def lint():
 
 
 @task
+def compass():
+    local('compass watch -c irco/explorer/assets/sass/config.rb')
+
+
+@task
+def livereload():
+    local('bundle exec guard')
+
+
+@task
 def authors():
     """
     Updates the AUTHORS file with a list of committers from GIT.
