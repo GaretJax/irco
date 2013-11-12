@@ -32,6 +32,10 @@ def compass():
 def livereload():
     local('bundle exec guard')
 
+@task
+def coffee():
+    local('coffee -c -w -j irco/explorer/static/scripts/master.js '
+          'irco/explorer/assets/coffeescripts')
 
 @task
 def authors():
