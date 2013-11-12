@@ -6,10 +6,10 @@
 Welcome to IRCO's documentation!
 ================================
 
-Contents:
-
 .. toctree::
    :maxdepth: 2
+
+   backup
 
 
 News
