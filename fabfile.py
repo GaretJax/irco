@@ -1,6 +1,6 @@
 import pipes
 
-from fabric.api import settings, task, local, hide
+from fabric.api import settings, task, local, hide, lcd
 from fabric.contrib.console import confirm
 
 
@@ -32,10 +32,18 @@ def compass():
 def livereload():
     local('bundle exec guard')
 
+
 @task
 def coffee():
     local('coffee -c -w -j irco/explorer/static/scripts/master.js '
           'irco/explorer/assets/coffeescripts')
+
+
+@task
+def docs():
+    with lcd('docs'):
+        local('make html')
+
 
 @task
 def authors():
