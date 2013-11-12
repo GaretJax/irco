@@ -66,6 +66,10 @@ def release():
         print 'Please commit the changes before continuing.'
         return
 
+    local('compass compile -c irco/explorer/assets/sass/config.rb')
+    local('coffee -c -j irco/explorer/static/scripts/master.js '
+          'irco/explorer/assets/coffeescripts')
+
     # Get version
     version = 'v{}'.format(local('python setup.py --version', capture=True))
     name = local('python setup.py --name', capture=True)
