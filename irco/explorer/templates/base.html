@@ -2,27 +2,35 @@
 <html>
 	<head>
 		<title>IRCO</title>
-
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}" />
 		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/screen.css') }}">
-
 	</head>
 	<body>
 	{% block body %}
-		<header>
-			<h1>IRCO Explorer</h1>
-			<nav>
-				<ul>
-					<li><a href="{{ url_for('index') }}">Index</a></li>
+		<nav class="navbar navbar-default" role="navigation">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="{{ url_for('index') }}">IRCO Explorer</a>
+			</div>
+			<div class="collapse navbar-collapse" id="navbar-collapse">
+				<ul class="nav navbar-nav">
 					<li><a href="{{ url_for('authors') }}">Authors</a></li>
 					<li><a href="{{ url_for('institutions') }}">Institutions</a></li>
 					<li><a href="{{ url_for('publications') }}">Publications</a></li>
 				</ul>
-			</nav>
-		</header>
-
+			</div>
+		</nav>
 		{% block content %}{% endblock %}
 	{% endblock %}
+	<script src="{{ url_for('static', filename='scripts/vendor/jquery-2.0.3.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='scripts/vendor/bootstrap-3.0.2.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='scripts/master.js') }}"></script>
 	</body>
 </html>
 

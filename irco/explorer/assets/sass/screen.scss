@@ -15,10 +15,19 @@ body {
 	padding: 20px;
 }
 
-/*h1 {
-	font-size: 30px;
+h1, h2, h3, h4, h5, h6 {
 	font-weight: bold;
 	font-family: Helvetica;
+}
+
+.navbar .navbar-brand {
+	color: #583600;
+	padding-left: 55px;
+	background: url('../images/logo-32.png') no-repeat 15px 50%;
+}
+
+/*h1 {
+	font-size: 30px;
 	margin: 20px 0 10px 0;
 }
 
