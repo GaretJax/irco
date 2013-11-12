@@ -1,0 +1,16 @@
+{% macro menu_item(url, name) -%}
+	<li{% if request.path.startswith(url) %} class="active"{% endif %}><a href="{{ url }}">{{ name }}</a></li>
+{%- endmacro %}
+
+{%- macro pagination(paginator, label=None) %}
+	<div class="paginator">
+		<ul class="pagination">
+			{{ paginator.prev() }}
+			{%- for p in paginator %}
+			{{ p }}
+			{%- endfor %}
+			{{ paginator.next() }}
+		</ul>
+		{% if label %}<p>{{ paginator.count }} {{ label }}</p>{% endif %}
+	</div>
+{%- endmacro %}

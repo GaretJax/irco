@@ -1,20 +1,26 @@
 {% extends "base.html" %}
 
+{% from "macros.html" import pagination %}
+
 {% block content %}
 		<h1>Authors index</h1>
-		<p>{{ authors.count() }} authors</p>
-		<table border="1">
+
+		{{ pagination(paginator, 'authors') }}
+
+		<table class="table table-striped table-condensed">
 			<thead>
 				<tr>
 					<th>Name</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for a in authors %}
+				{% for a in objects %}
 				<tr>
 					<td><a href="{{ url_for('author', author_id=a.id) }}">{{ a.name }}</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>
 		</table>
+
+		{{ pagination(paginator, 'authors') }}
 {% endblock %}

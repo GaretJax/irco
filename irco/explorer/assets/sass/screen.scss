@@ -15,9 +15,24 @@ body {
 	padding: 20px;
 }
 
+.table tr:last-child {
+	> td, > th {
+		border-bottom: 1px solid #dddddd;
+	}
+}
+
 h1, h2, h3, h4, h5, h6 {
 	font-weight: bold;
 	font-family: Helvetica;
+}
+
+h1 {
+	margin: 3.5rem 0;
+}
+
+h2 {
+	margin-top: 3.5rem;
+	font-size: 2.7rem;
 }
 
 .navbar .navbar-brand {
@@ -25,6 +40,79 @@ h1, h2, h3, h4, h5, h6 {
 	padding-left: 55px;
 	background: url('../images/logo-32.png') no-repeat 15px 50%;
 }
+
+.paginator {
+	text-align: center;
+	display: block;
+	margin-bottom: 20px;
+
+	.pagination {
+		margin-bottom: 0;
+	}
+
+	p {
+		margin: 4px 0 0 0;
+		text-align: center;
+		color: #888;
+		font-size: 1.3rem;
+	}
+}
+
+.pagination {
+/*	width: 100%;
+	text-align: center;
+	font-size: 0;
+
+	a, span {
+		font-size: 1.4rem;
+		display: inline-block;
+	}
+
+	> li > a,
+	> li > span {
+		float: none;
+	}*/
+
+	.ellipsis span {
+		border-top: 0;
+		border-bottom: 0;
+		color: #999;
+	}
+
+	li:first-child a,
+	li:first-child span {
+		margin-right: 1em;
+		//float: left;
+		@include border-radius($border-radius-base);
+	}
+	
+	li:last-child a,
+	li:last-child span {
+		margin-left: 1em;
+		//float: right;
+		@include border-radius($border-radius-base);
+	}
+
+	li:nth-child(2) a {
+		@include border-left-radius($border-radius-base);
+	}
+	li:nth-last-child(2) a {
+		@include border-right-radius($border-radius-base);
+	}
+}
+
+
+#institution-meta table th {
+	width: 200px;
+	background: #f9f9f9;
+	text-align: right;
+	padding-right: 10px;
+
+	& + td {
+		padding-left: 10px;
+	}
+}
+
 
 /*h1 {
 	font-size: 30px;
