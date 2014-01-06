@@ -2,6 +2,9 @@ include entry-points.ini
 include requirements.txt
 include requirements-dev.txt
 include fabfile.py
+include AUTHORS
+include LICENSE
+include NEWS
 graft docs
 graft irco/explorer/static
-graft irco/explorer/assets
+graft irco/explorer/templates
