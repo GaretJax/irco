@@ -64,13 +64,13 @@ class Setup(object):
 Setup.test_links()
 
 setup(name='irco',
-      version='0.6.2',
+      version='0.6.3',
       description='International Research Collaboration Graphs',
       author='Jonathan Stoppani',
       author_email='jonathan@stoppani.name',
       url='https://github.com/GaretJax/irco',
       license='MIT',
       packages=find_packages(),
-      include_package_data=False,
+      include_package_data=True,
       install_requires=Setup.requirements('requirements.txt'),
       entry_points=Setup.read('entry-points.ini', True))
