@@ -1,6 +1,6 @@
 import argparse
 
-from irco.explorer import app, database
+from irco.explorer import app, database, filters
 
 
 def main():
@@ -14,6 +14,7 @@ def main():
 
     app.config['DATABASE'] = args.database
     database.init_app(app)
+    filters.init_app(app)
 
     app.run(
         host=args.interface,

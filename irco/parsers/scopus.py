@@ -9,15 +9,17 @@ from . import base
 
 
 class LineGetter(object):
-    def __init__(self):
+    def __init__(self, stream):
         self.value = ''
+        self.stream = stream
+
+    def __iter__(self):
+        for l in self.stream:
+            self.value = l
+            yield l
 
     def get(self):
-        v, self.value = self.value, ''
-        return v.strip()
-
-    def write(self, val):
-        self.value += val
+        return self.value.strip()
 
 
 class Tokenizer(base.Tokenizer):
@@ -25,13 +27,14 @@ class Tokenizer(base.Tokenizer):
 
     def __init__(self, encoding='utf8'):
         self.encoding = encoding
-        self.lines = LineGetter()
-        self.writer = csv.writer(self.lines)
 
     def tokenize(self, stream):
         self.stream = stream
         self.line = 2
-        self.reader = csv.DictReader(stream)
+        self.header_row = next(self.stream)
+        self.stream.seek(0)
+        self.lines = LineGetter(self.stream)
+        self.reader = csv.DictReader(self.lines)
         self.reader.fieldnames = [self._get_key(f) for f in
                                   self.reader.fieldnames]
         return self
@@ -41,9 +44,10 @@ class Tokenizer(base.Tokenizer):
 
     def next(self):
         row = next(self.reader)
-        self.writer.writerow(row.values())
-        record = base.Record(self.FORMAT,
-                             unicode(self.lines.get(), self.encoding))
+        record = base.Record(
+            self.FORMAT,
+            unicode(self.header_row + self.lines.get(), self.encoding)
+        )
         record.source = (self.stream.name, self.line)
         record.update(row)
         self.line += 1

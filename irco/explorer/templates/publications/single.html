@@ -42,11 +42,11 @@
 					</tr>
 				</thead>
 				<tbody>
-					{% for institution in publication.institutions %}
+					{%- for institution in publication.institutions %}
 					<tr id="institution-{{ institution.id }}">
 						<td><a href="{{ url_for('institution', institution_id=institution.id) }}">{{ institution.name }}</a></td>
 					</tr>
-					{% endfor %}
+					{%- endfor %}
 				</tbody>
 			</table>
 		</section>
@@ -58,6 +58,8 @@
 				<dd>{{ publication.unique_source_id }}</dd>
 				<dt>Record format</dt>
 				<dd>{{ publication.unparsed_record_format }}</dd>
+				<dt>Record content</dt>
+				<dd>{{ publication|format_record }}</dd>
 				<dt>Raw record</dt>
 				<dd>
 					<pre>{{ publication.unparsed_record_value }}</pre>

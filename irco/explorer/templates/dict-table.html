@@ -1,0 +1,10 @@
+<table class="table table-bordered table-condensed">
+	<tbody>
+		{% for k, v in table.iteritems() %}
+		<tr>
+			<th>{{ k }}</th>
+			<td>{{ v }}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
