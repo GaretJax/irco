@@ -64,7 +64,7 @@ class Setup(object):
 Setup.test_links()
 
 setup(name='irco',
-      version='0.6.1',
+      version='0.6.2',
       description='International Research Collaboration Graphs',
       author='Jonathan Stoppani',
       author_email='jonathan@stoppani.name',
