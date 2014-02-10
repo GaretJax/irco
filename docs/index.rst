@@ -9,6 +9,8 @@ Welcome to IRCO's documentation!
 .. toctree::
    :maxdepth: 2
 
+   graphs/index
+   shell
    backup
 
 
