@@ -1,4 +1,5 @@
 import collections
+import sys
 from itertools import combinations
 
 import networkx as nx
@@ -26,7 +27,7 @@ def get_country(author):
     return country
 
 
-def create(session):
+def create(session, criteria):
     g = nx.Graph()
 
     countries = set()
@@ -36,9 +37,9 @@ def create(session):
     for author in session.query(models.Person):
         country = get_country(author)
         countries.add(country)
-        g.add_node(author.name, affiliation_country=country)
+        g.add_node(author.name, affiliation_country=country, papers=0)
 
-    for publication in session.query(models.Publication):
+    for publication in session.query(models.Publication).filter(criteria):
         author_names = []
 
         for author in publication.authors:
@@ -56,6 +57,11 @@ def create(session):
         n = g.node[author]
         n['papers'] = count
         n['affiliation_country_id'] = countries[n['affiliation_country']]
+
+    # Remove authors with no papers
+    for a, d in g.nodes_iter(data=True):
+        if not d['papers']:
+            g.remove_node(a)
 
     # Set edge weight
     for (c1, c2), count in collaborations_count.iteritems():

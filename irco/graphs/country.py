@@ -86,13 +86,13 @@ def get_countries(publication):
     return countries
 
 
-def create(session):
+def create(session, criteria):
     g = nx.Graph()
 
     papers_count = collections.Counter()
     collaborations_count = collections.Counter()
 
-    for publication in session.query(models.Publication):
+    for publication in session.query(models.Publication).filter(criteria):
         countries = get_countries(publication)
         g.add_nodes_from(countries)
         papers_count.update(countries)
