@@ -12,6 +12,35 @@ dataset. The first one is the most coarse grained, while the last one is the
 most fine grained.
 
 
+Limiting graphs by year
+-----------------------
+
+It is possible to limit the result set for which graphs are generated to 
+publications occurred during certain years.
+
+To activate the filtering, it suffices to pass a value for the ``--years``
+option when invoking the ``irco-graph`` command.
+
+The ``--years`` options can parse the following values:
+
+* A single year: ``2012``
+* A list of single years: ``2003,2007,2013``
+* A range of years (inclusive on both ends): ``2003-2006`` (equivalent to
+  ``2003,2004,2005,2006``). Additionally a range can be open on one of its end,
+  in which case no limiting will occur on that side:
+
+  - ``2012-`` will select all publications with a publication date of 2012 or later;
+  - ``-2002`` will select all publication with a publication date of 2002 or earlier.
+
+* A combination of single years and ranges: ``2003-2006,2009,2012-``
+
+The following command creates a ``country`` graph with all papers published in
+or before 2000, in 2002, in 2003, in 2004, in 2005, in 2006, in 2008, in 2009,
+or after 2013 (included)::
+
+    irco-graph --years 2008,2009,2002-2006,-2000,2013- country sqlite:///test.db test.gexf
+
+
 Problems with the *Institution* graph
 ---------------------------------------
 
