@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import re
 from setuptools import setup, find_packages
 
 
@@ -44,6 +45,14 @@ class Setup(object):
                     yield os.path.join(basedir, root, name)[rem:]
 
     @staticmethod
+    def version():
+        data = Setup.read(os.path.join('{{ cookiecutter.repo_name }}',
+                                       '__init__.py'))
+        version = (re.search(u"__version__\s*=\s*u?'([^']+)'", data)
+                   .group(1).strip())
+        return version
+
+    @staticmethod
     def test_links():
         # Test if hardlinks work. This is a workaround until
         # http://bugs.python.org/issue8876 is solved
@@ -64,7 +73,7 @@ class Setup(object):
 Setup.test_links()
 
 setup(name='irco',
-      version='0.6.3',
+      version=Setup.version(),
       description='International Research Collaboration Graphs',
       author='Jonathan Stoppani',
       author_email='jonathan@stoppani.name',
@@ -72,5 +81,14 @@ setup(name='irco',
       license='MIT',
       packages=find_packages(),
       include_package_data=True,
+      zip_safe=False,
       install_requires=Setup.requirements('requirements.txt'),
-      entry_points=Setup.read('entry-points.ini', True))
+      entry_points=Setup.read('entry-points.ini', True),
+      classifiers=[
+          'Development Status :: 4 - Beta',
+          'Intended Audience :: Developers',
+          'License :: OSI Approved :: MIT License',
+          'Operating System :: OS Independent',
+          'Programming Language :: Python',
+          'Topic :: Software Development :: Libraries :: Python Modules',
+      ])
