@@ -46,8 +46,7 @@ class Setup(object):
 
     @staticmethod
     def version():
-        data = Setup.read(os.path.join('{{ cookiecutter.repo_name }}',
-                                       '__init__.py'))
+        data = Setup.read(os.path.join('irco', '__init__.py'))
         version = (re.search(u"__version__\s*=\s*u?'([^']+)'", data)
                    .group(1).strip())
         return version
