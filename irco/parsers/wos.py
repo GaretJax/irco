@@ -27,6 +27,7 @@ class Tokenizer(base.Tokenizer):
     FIELDS = {
         'TI': 'title',
         'PY': 'year',
+        'PT': 'type',
         'C1': 'authors_with_affiliations',
     }
 
@@ -83,7 +84,16 @@ class Parser(base.Parser):
 
 
 class BaseValuesProcessor(base.Processor):
+    pubtypes = {
+        'J': 'journal',
+    }
+
     def process_record(self, record):
+        try:
+            record['type'] = self.pubtypes[record['type']]
+        except KeyError:
+            raise ValueError('Unknown publication type: {}'.format(
+                record['type']))
         unique_id = record.pop('UT')
         record.unique_source_id = 'wos/' + unique_id.split(':', 1)[1]
         return record
