@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from irco import models, utils
-from irco.parsers import scopus, compendex
+from irco.parsers import scopus, compendex, wos
 from irco.logging import get_logger
 
 
@@ -71,6 +71,7 @@ def main():
     pipelines = {
         'compendex': compendex.pipeline,
         'scopus': scopus.pipeline,
+        'wos': wos.pipeline,
     }
 
     argparser = argparse.ArgumentParser('irco-import')
