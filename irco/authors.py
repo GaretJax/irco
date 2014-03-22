@@ -124,3 +124,22 @@ class Author(unicode):
                 else:
                     return False
         return True
+
+    def find_best_match(self, authors):
+        authors = set(authors)
+
+        for a in authors:
+            if a == self:
+                return a
+
+        candidates = [a for a in authors if set(self.chunks) & set(a.chunks)]
+
+        if len(candidates) == 1:
+            # Ok, we found it
+            return candidates[0]
+        elif candidates:
+            # Multiple matches left
+            pass
+        else:
+            # Zero matches
+            pass
