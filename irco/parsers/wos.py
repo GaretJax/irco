@@ -1,0 +1,127 @@
+import csv
+import re
+import urlparse
+
+from ftfy import fix_text
+
+from irco.authors import Author
+from . import base
+
+
+class LineGetter(object):
+    def __init__(self, stream):
+        self.value = ''
+        self.stream = stream
+
+    def __iter__(self):
+        for l in self.stream:
+            self.value = l
+            yield l
+
+    def get(self):
+        return self.value.strip()
+
+
+class Tokenizer(base.Tokenizer):
+    FORMAT = 'webofscience-tsv'
+    FIELDS = {
+        'TI': 'title',
+        'PY': 'year',
+        'C1': 'authors_with_affiliations',
+    }
+
+    def __init__(self, encoding='utf8'):
+        self.encoding = encoding
+
+    def tokenize(self, stream):
+        self.stream = stream
+        self.line = 2
+        self.header_row = next(self.stream)
+        self.stream.seek(0)
+        self.lines = LineGetter(self.stream)
+        self.reader = csv.DictReader(self.lines, delimiter='\t')
+        self.reader.fieldnames = [self._get_key(f) for f in
+                                  self.reader.fieldnames]
+        return self
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        row = next(self.reader)
+        record = base.Record(
+            self.FORMAT,
+            unicode(self.header_row + self.lines.get(), self.encoding)
+        )
+        record.source = (self.stream.name, self.line)
+        record.update(row)
+        self.line += 1
+
+        return record
+
+    def _get_key(self, k):
+        k = fix_text(unicode(k, self.encoding))
+        k = str(k)
+        k = self.FIELDS.get(k, k)
+        return k
+
+
+class Parser(base.Parser):
+    def __init__(self, encoding='utf8'):
+        self.encoding = encoding
+
+    def parse_record(self, record):
+        for k, v in record.iteritems():
+            if k is None:
+                raise ValueError('Incorrectly parsed row')
+            record[k] = self._get_value(v)
+        return record
+
+    def _get_value(self, v):
+        v = unicode(v, self.encoding)
+        return fix_text(v)
+
+
+class BaseValuesProcessor(base.Processor):
+    def process_record(self, record):
+        unique_id = record.pop('UT')
+        record.unique_source_id = 'wos/' + unique_id.split(':', 1)[1]
+        return record
+
+
+class AffiliationsProcessor(base.Processor):
+    splitter = re.compile(r'\[([^\]]+)] ([^;]+)(?:; |$)')
+
+    def process_record(self, record):
+        record['institutions'] = {}
+        record['authors'] = []
+
+        affiliations = self.splitter.findall(
+            record['authors_with_affiliations'].strip())
+
+        if not affiliations:
+            affiliations = [
+                (record['AF'], record['authors_with_affiliations'])
+            ]
+
+        # TODO: Some authors could have two affiliations! This should be
+        # checked here and a warning raised.
+
+        for i, (authors, institution) in enumerate(affiliations):
+            record['institutions'][i] = institution
+
+            for a in authors.split('; '):
+                author = Author(a)
+                record['authors'].append((author, i))
+
+        return record
+
+
+pipeline = base.Pipeline(
+    Tokenizer(),
+    Parser(),
+    [
+        BaseValuesProcessor(),
+        AffiliationsProcessor(),
+    ]
+)
