@@ -18,13 +18,13 @@ def get_institutions(publication):
     return institutions
 
 
-def create(session, criteria):
+def create(session, publications):
     g = nx.Graph()
 
     papers_count = collections.Counter()
     collaborations_count = collections.Counter()
 
-    for publication in session.query(models.Publication).filter(criteria):
+    for publication in publications:
         institutions = get_institutions(publication)
         g.add_nodes_from(institutions)
         papers_count.update(institutions)

@@ -27,7 +27,7 @@ def get_country(author):
     return country
 
 
-def create(session, criteria):
+def create(session, publications):
     g = nx.Graph()
 
     countries = set()
@@ -39,7 +39,7 @@ def create(session, criteria):
         countries.add(country)
         g.add_node(author.name, affiliation_country=country, papers=0)
 
-    for publication in session.query(models.Publication).filter(criteria):
+    for publication in publications:
         author_names = []
 
         for author in publication.authors:

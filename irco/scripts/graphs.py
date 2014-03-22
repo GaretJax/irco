@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, aliased, joinedload
 from sqlalchemy.sql.expression import true, false
 
 from irco import graphs, models
@@ -23,10 +23,18 @@ def main():
     argparser.add_argument('output', default='-', nargs='?')
 
     args = argparser.parse_args()
+    graph_factory = graphs.get_graph(args.graph_type)
 
     engine = create_engine(args.database, echo=args.verbose)
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-    graph_factory = graphs.get_graph(args.graph_type)
+    publications = (session
+                    .query(models.Publication)
+                    .options(
+                        joinedload('affiliations').joinedload('author'),
+                        joinedload('affiliations').joinedload('institution'),
+                    ))
 
     if args.years:
         criteria = false()
@@ -43,11 +51,11 @@ def main():
             else:
                 c = models.Publication.year == int(y)
             criteria = criteria | c
-    else:
-        criteria = true()
 
-    Session = sessionmaker(bind=engine)
-    graph = graph_factory.create(Session(), criteria)
+        publications = publications.filter(criteria)
+
+
+    graph = graph_factory.create(session, publications)
 
     if args.output == '-':
         write(sys.stdout, graph)
