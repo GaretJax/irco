@@ -18,6 +18,8 @@ def main():
     argparser = argparse.ArgumentParser('irco-graph')
     argparser.add_argument('-v', '--verbose', action='store_true')
     argparser.add_argument('-y', '--years')
+    argparser.add_argument('-c', '--ca-country', action='append',
+                           dest='ca_countries')
     argparser.add_argument('graph_type', choices=graph_choices)
     argparser.add_argument('database')
     argparser.add_argument('output', default='-', nargs='?')
@@ -54,6 +56,20 @@ def main():
 
         publications = publications.filter(criteria)
 
+    if args.ca_countries:
+        c_author = aliased(models.AffiliatedAuthor)
+        c_institution = aliased(models.Institution)
+
+        criteria = false()
+
+        for country in args.ca_countries:
+            criteria = criteria | (c_institution.country == country)
+
+        publications = (publications
+                        .join(c_author)
+                        .join(c_institution)
+                        .filter(c_author.is_corresponding == True)
+                        .filter(criteria))
 
     graph = graph_factory.create(session, publications)
 
