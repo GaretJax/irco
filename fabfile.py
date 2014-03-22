@@ -112,3 +112,6 @@ def release():
 
     # Package and upload to pypi
     local('python setup.py sdist bdist_wheel upload')
+
+    # Make distutils' version checker happy
+    local('python setup.py develop')
