@@ -13,4 +13,14 @@ command as shown below::
 Importing some data
 -------------------
 
+.. todo::
 
+Browsing the database
+---------------------
+
+.. todo::
+
+Generating a graph
+------------------
+
+.. todo::

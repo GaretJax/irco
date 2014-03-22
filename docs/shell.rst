@@ -1,5 +1,5 @@
-Command line utilities
-======================
+Command line utilities reference
+================================
 
 The IRCO packages comes with different command line utilities to work on
 data sets.

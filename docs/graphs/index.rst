@@ -1,6 +1,9 @@
 Generating graphs
 =================
 
+Graph types
+-----------
+
 Currently three types of graphs are supported:
 
 1. Country
@@ -12,8 +15,11 @@ dataset. The first one is the most coarse grained, while the last one is the
 most fine grained.
 
 
-Limiting graphs by year
------------------------
+Filtering publications
+----------------------
+
+Filtering by publication year
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 It is possible to limit the result set for which graphs are generated to 
 publications occurred during certain years.
@@ -41,8 +47,49 @@ or after 2013 (included)::
     irco-graph --years 2008,2009,2002-2006,-2000,2013- country sqlite:///test.db test.gexf
 
 
+Filtering by corresponding author country
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Publications can be filtered by ore more corresponding author countries. When
+active, this filter will only show publications for which the country of the 
+institution of the corresponding author is in the list of defined values.
+
+To activate the filtering, it suffices to pass one or more values for the
+``--ca-country`` option when invoking the ``irco-graph`` command. The option
+can be repeated multiple times to specify more than one alowed countries.
+
+The short hand version of the argument, ``-c``, can be used as well and the
+country name matching is case insensitive.
+
+The following command creates a ``country`` graph with all papers which have
+a corresponding authors affiliated to an institution residing in either Kuwait
+or Qatar::
+
+    irco-graph --ca-country=Kuwait -c qatar country sqlite:///test.db test.gexf
+
+
+
+Filtering by publication type
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Publications can be filtered by their type. The currently known types are:
+``journal``, ``conference``, ``book``, ``book in series`` and ``patent``.
+
+Filtering by publication type works similarly as with the corresponding author
+country filter, but by using the ``--type`` (or ``-t`` short hand) command line
+option.
+
+The followign command creates a ``country`` graph with all journal articles or
+book publications::
+
+    irco-graph --type=book -t journal country sqlite:///test.db test.gexf
+
+
+Misc notes
+----------
+
 Problems with the *Institution* graph
----------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The current implementation of the *Institution* graph takes the institution
 name as the key to create graph nodes. This behaviour induces the system to

@@ -9,7 +9,9 @@ Welcome to IRCO's documentation!
 .. toctree::
    :maxdepth: 2
 
+   installation
    quickstart
+   formats
    graphs/index
    shell
    backup
@@ -19,10 +21,9 @@ News
 ====
 
 .. toctree::
-   :glob:
-   :maxdepth: 1
+   :maxdepth: 2
 
-   news/*
+   news/index
 
 
 Indices and tables
