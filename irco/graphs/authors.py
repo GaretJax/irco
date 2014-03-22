@@ -1,6 +1,6 @@
 import collections
-import sys
 from itertools import combinations
+from sqlalchemy.orm import joinedload
 
 import networkx as nx
 
@@ -11,10 +11,7 @@ NO_COUNTRY = '<no country>'
 
 
 def get_country(author):
-    def extract_country(institution):
-        return institution.name.rsplit(',', 1)[-1].strip().lower()
-
-    countries = [extract_country(i) for i in author.institutions]
+    countries = [a.institution.country for a in author.affiliations]
 
     if len(countries) == 1:
         country = countries[0]
@@ -34,7 +31,11 @@ def create(session, publications):
     papers_count = collections.Counter()
     collaborations_count = collections.Counter()
 
-    for author in session.query(models.Person):
+    authors = (session.query(models.Person).options(
+        joinedload('affiliations').joinedload('institution')
+    ))
+
+    for author in authors:
         country = get_country(author)
         countries.add(country)
         g.add_node(author.name, affiliation_country=country, papers=0)
@@ -42,7 +43,8 @@ def create(session, publications):
     for publication in publications:
         author_names = []
 
-        for author in publication.authors:
+        for affiliation in publication.affiliations:
+            author = affiliation.author
             papers_count[author.name] += 1
             author_names.append(author.name)
 

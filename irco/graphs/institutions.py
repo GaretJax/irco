@@ -1,19 +1,20 @@
-import sys
 import itertools
 import collections
 
 import networkx as nx
 
-from irco import models, logging
+
+from irco import logging
 
 log = logging.get_logger()
+
 
 
 def get_institutions(publication):
     institutions = set()
 
-    for institution in publication.institutions:
-        institutions.add(institution.name)
+    for affiliation in publication.affiliations:
+        institutions.add(affiliation.institution.name)
 
     return institutions
 

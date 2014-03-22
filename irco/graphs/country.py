@@ -4,7 +4,8 @@ import collections
 
 import networkx as nx
 
-from irco import models, logging, countries
+
+from irco import logging, countries
 
 log = logging.get_logger()
 
@@ -12,9 +13,10 @@ log = logging.get_logger()
 def get_countries(publication):
     publication_countries = set()
 
-    for institution in publication.institutions:
+    for affiliation in publication.affiliations:
         try:
-            country = countries.get_institution_country(institution.name)
+            country = countries.get_institution_country(
+                affiliation.institution.name)
         except countries.CountryNotFound as e:
             print >>sys.stderr, unicode(e)
         else:
