@@ -3,7 +3,7 @@ import argparse
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from irco import models, utils
+from irco import models, utils, countries
 from irco.parsers import scopus, compendex, wos
 from irco.logging import get_logger
 
@@ -41,8 +41,14 @@ def import_records(engine, records):
         institutions = {}
 
         for k, v in record['institutions'].iteritems():
+            try:
+                country = countries.get_institution_country(v)
+            except countries.CountryNotFound:
+                country = None
+
             instance, _ = models.get_or_create(
-                session, models.Institution, name=v
+                session, models.Institution, defaults={'country': country},
+                name=v
             )
             institutions[k] = (instance, v)
 
