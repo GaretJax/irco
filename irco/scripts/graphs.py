@@ -20,6 +20,8 @@ def main():
     argparser.add_argument('-y', '--years')
     argparser.add_argument('-c', '--ca-country', action='append',
                            dest='ca_countries')
+    argparser.add_argument('-t', '--type', action='append',
+                           dest='types')
     argparser.add_argument('graph_type', choices=graph_choices)
     argparser.add_argument('database')
     argparser.add_argument('output', default='-', nargs='?')
@@ -72,6 +74,14 @@ def main():
                         .join(c_institution)
                         .filter(c_author.is_corresponding == True)
                         .filter(criteria))
+
+    if args.types:
+        criteria = false()
+
+        for type in args.types:
+            criteria = criteria | (models.Publication.type == type)
+
+        publications = publications.filter(criteria)
 
     graph = graph_factory.create(session, publications)
 
