@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Unicode, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Unicode, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship, object_session
 from sqlalchemy.sql.expression import ClauseElement
 
@@ -76,8 +76,10 @@ class Publication(Base):
 
     # Basic attributes
     id = Column(Integer, primary_key=True)
+    type = Column(String(32), nullable=True)
     title = Column(Unicode(120), nullable=False)
     year = Column(Integer)
+    total_citations = Column(Integer, nullable=True)
 
     # Relationships
     def get_institutions(self, session):
@@ -121,3 +123,5 @@ class AffiliatedAuthor(Base):
     publication_id = Column(Integer, ForeignKey('publication.id'),
                             nullable=False)
     publication = relationship(Publication, backref='affiliations')
+
+    is_corresponding = Column(Boolean, default=False)

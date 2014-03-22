@@ -30,6 +30,8 @@ def import_records(engine, records):
         publication = models.Publication(
             year=record['year'],
             title=record['title'],
+            type=record.get('type', None),
+            total_citations=record.get('total_citations', None),
             unique_source_id=record.unique_source_id,
             unparsed_record_format=record.format,
             unparsed_record_value=record.raw_value,
@@ -54,6 +56,7 @@ def import_records(engine, records):
 
             affiliated_author = models.AffiliatedAuthor(
                 order=1,
+                is_corresponding=(record.get('corresponding_author', None) == i),
                 unparsed_institution_name=raw,
                 institution=institution,
                 unparsed_person_name=name,
