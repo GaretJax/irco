@@ -76,9 +76,9 @@ class Pipeline(object):
             return self.parser.parse_record(record)
         except Exception as e:
             print "Error while parsing record"
-            print e
+            print str(type(e).__name__) + ':', e
             print record.source
-            print record['title']
+            print record.get('title', '<no title field>')
             print
 
     def process(self, stream):
