@@ -1,4 +1,5 @@
 import abc
+import inspect
 
 
 class IgnoreRecord(Exception):
@@ -58,6 +59,25 @@ class Pipeline(object):
         self.parser = parser
         self.processors = processors
 
+    def _format_error(self, record, e, processor=None):
+        frm = inspect.trace()[-1]
+        mod = inspect.getmodule(frm[0])
+        line = inspect.getsourcelines(frm[0])[1] + 1
+        title = record.get('title', '')
+        if len(title) > 50:
+            title = title[:50] + '...'
+        if processor:
+            print '=== ERROR WHILE PROCESSING RECORD =============================================='
+            print ' Processor class: {}'.format(processor.__class__.__name__)
+        else:
+            print '=== ERROR WHILE PARSING RECORD ================================================='
+        print '          Module: {}:{}'.format(mod.__name__, line)
+        print '       Exception: {}'.format(type(e).__name__)
+        print '         Message: {}'.format(e)
+        print '     Source file: {0[0]}:{0[1]}'.format(record.source)
+        print '    Record title: {}'.format(title)
+        print '-' * 80
+
     def _apply_processor(self, p, records):
         return (self._process_record(p, r) for r in records if r is not None)
 
@@ -65,21 +85,13 @@ class Pipeline(object):
         try:
             return processor.process_record(record)
         except Exception as e:
-            print "Error while processing record"
-            print e
-            print record.source
-            print record['title']
-            print
+            self._format_error(record, e, processor=processor)
 
     def _parse_record(self, record):
         try:
             return self.parser.parse_record(record)
         except Exception as e:
-            print "Error while parsing record"
-            print str(type(e).__name__) + ':', e
-            print record.source
-            print record.get('title', '<no title field>')
-            print
+            self._format_error(record, e)
 
     def process(self, stream):
         records = self.tokenizer.tokenize(stream)
