@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker, aliased, joinedload
 from sqlalchemy.sql.expression import true, false
 
@@ -63,7 +63,9 @@ def main():
         criteria = false()
 
         for country in args.ca_countries:
-            criteria = criteria | (c_institution.country == country)
+            criteria = criteria | (
+                func.lower(c_institution.country) == func.lower(country)
+            )
 
         publications = (publications
                         .join(c_author)
