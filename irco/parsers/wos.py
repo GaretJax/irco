@@ -87,6 +87,10 @@ class Parser(base.Parser):
 class BaseValuesProcessor(base.Processor):
     pubtypes = {
         'J': 'journal',
+        'C': 'conference',
+        'B': 'book',
+        'P': 'patent',
+        'S': 'book in series',
     }
 
     def process_record(self, record):
