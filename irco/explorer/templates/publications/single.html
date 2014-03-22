@@ -10,10 +10,22 @@
 					<th>Publication year</th>
 					<td>{{ publication.year }}</td>
 				</tr>
+				{% if publication.type is not none %}
+				<tr>
+					<th>Publication type</th>
+					<td>{{ publication.type }}</td>
+				</tr>
+				{% endif %}
+				{% if publication.total_citations is not none %}
+				<tr>
+					<th>Total citations</th>
+					<td>{{ publication.total_citations }}</td>
+				</tr>
+				{% endif %}
 			</table>
 		</section>
 
-		<section>
+		<section id="authors">
 			<h2>Authors</h2>
 			<table class="table table-striped table-condensed">
 				<thead>
@@ -24,7 +36,7 @@
 				</thead>
 				<tbody>
 					{% for affiliation in publication.affiliations %}
-					<tr>
+					<tr{% if affiliation.is_corresponding %} class="corresponding"{% endif %}>
 						<td><a href="{{ url_for('author', author_id=affiliation.author.id) }}">{{ affiliation.author.name }}</a></td>
 						<td><a href="{{ url_for('institution', institution_id=affiliation.institution.id) }}">{{ affiliation.institution.name }}</a></td>
 					</tr>
