@@ -59,6 +59,10 @@ class Author(unicode):
             elif parts[i] == '.':
                 parts[i-1] += parts[i]
                 del parts[i]
+            elif re.match(r'[A-Z]{2,}', parts[i]):
+                expanded = [p + '.' for p in parts[i]]
+                parts[i:i+1] = expanded
+                i += len(expanded)
             else:
                 i += 1
 
