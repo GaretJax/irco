@@ -2,88 +2,25 @@ import sys
 import itertools
 import collections
 
-import pycountry
 import networkx as nx
 
-from irco import models, logging
+from irco import models, logging, countries
 
 log = logging.get_logger()
 
-_countries = {}
-
-
-PREFIXES = set(['Republic of', ])
-NAMES = {c.name.lower(): c for c in pycountry.countries.objects}
-REPLACEMENTS = {
-    'South Korea': 'Korea, Republic of'
-}
-
-
-class CountryNotFound(Exception):
-    def __init__(self, token, text):
-        self.token = token
-        self.text = text
-
-    def __unicode__(self):
-        return (u'Fuzzy search for "{}" returned no results (complete record: '
-                '"{}")'.format(self.token, self.text))
-
-
-_countries = {}
-
-
-def get_country(institution):
-    text = institution.name
-    tokens = text.split(', ')
-
-    country_token = tokens[-1]
-
-    if country_token in REPLACEMENTS:
-        country_token = REPLACEMENTS[country_token]
-
-    if country_token in PREFIXES:
-        country_token = tokens[-2] + ', ' + tokens[-1]
-
-    if country_token not in _countries:
-        country = None
-        try:
-            country = pycountry.countries.get(name=country_token)
-        except KeyError:
-            try:
-                country = pycountry.countries.get(name=country_token)
-            except KeyError:
-                cl = country_token.lower()
-                for k, country in NAMES.iteritems():
-                    v = country.name.lower()
-                    if cl in v or v in cl:
-                        break
-                    if country.alpha3 in country_token.split(' '):
-                        break
-                    if country.alpha2 in country_token.split(' '):
-                        break
-                else:
-                    country = None
-            if country:
-                print >>sys.stderr, 'Fuzzy search for "{}" matched "{}"'.format(
-                    country_token, country.name)
-            else:
-                raise CountryNotFound(country_token, text)
-
-        _countries[country_token] = country.name
-
-    return _countries[country_token]
-
 
 def get_countries(publication):
-    countries = set()
+    publication_countries = set()
 
     for institution in publication.institutions:
         try:
-            countries.add(get_country(institution))
-        except CountryNotFound as e:
+            country = countries.get_institution_country(institution.name)
+        except countries.CountryNotFound as e:
             print >>sys.stderr, unicode(e)
+        else:
+            publication_countries.add(country)
 
-    return countries
+    return publication_countries
 
 
 def create(session, criteria):
@@ -93,11 +30,11 @@ def create(session, criteria):
     collaborations_count = collections.Counter()
 
     for publication in session.query(models.Publication).filter(criteria):
-        countries = get_countries(publication)
-        g.add_nodes_from(countries)
-        papers_count.update(countries)
+        publication_countries = get_countries(publication)
+        g.add_nodes_from(publication_countries)
+        papers_count.update(publication_countries)
 
-        collaborations = list(itertools.combinations(countries, 2))
+        collaborations = list(itertools.combinations(publication_countries, 2))
         collaborations_count.update(collaborations)
         g.add_edges_from(collaborations)
 
