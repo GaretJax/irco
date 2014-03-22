@@ -79,7 +79,7 @@ class Publication(Base):
     type = Column(String(32), nullable=True)
     title = Column(Unicode(120), nullable=False)
     year = Column(Integer)
-    total_citations = Column(Integer, nullable=True)
+    times_cited = Column(Integer, nullable=True)
 
     # Relationships
     def get_institutions(self, session):

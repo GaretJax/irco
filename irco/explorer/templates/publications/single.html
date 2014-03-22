@@ -16,10 +16,10 @@
 					<td>{{ publication.type }}</td>
 				</tr>
 				{% endif %}
-				{% if publication.total_citations is not none %}
+				{% if publication.times_cited is not none %}
 				<tr>
-					<th>Total citations</th>
-					<td>{{ publication.total_citations }}</td>
+					<th>Times cited</th>
+					<td>{{ publication.times_cited }}</td>
 				</tr>
 				{% endif %}
 			</table>

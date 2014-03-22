@@ -29,7 +29,7 @@ class Tokenizer(base.Tokenizer):
         'PY': 'year',
         'PT': 'type',
         'C1': 'authors_with_affiliations',
-        'TC': 'total_citations'
+        'TC': 'times_cited'
     }
 
     def __init__(self, encoding='utf8'):
@@ -95,7 +95,7 @@ class BaseValuesProcessor(base.Processor):
         except KeyError:
             raise ValueError('Unknown publication type: {}'.format(
                 record['type']))
-        record['total_citations'] = int(record['total_citations'])
+        record['times_cited'] = int(record['times_cited'])
         unique_id = record.pop('UT')
         record.unique_source_id = 'wos/' + unique_id.split(':', 1)[1]
         return record

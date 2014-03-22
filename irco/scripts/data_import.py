@@ -31,7 +31,7 @@ def import_records(engine, records):
             year=record['year'],
             title=record['title'],
             type=record.get('type', None),
-            total_citations=record.get('total_citations', None),
+            times_cited=record.get('times_cited', None),
             unique_source_id=record.unique_source_id,
             unparsed_record_format=record.format,
             unparsed_record_value=record.raw_value,
