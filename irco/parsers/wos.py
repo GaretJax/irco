@@ -105,6 +105,11 @@ class AffiliationsProcessor(base.Processor):
     splitter = re.compile(r'\[([^\]]+)] ([^;]+)(?:; |$)')
 
     def process_record(self, record):
+        corresponding = record['RP']
+
+        corresponding = corresponding[:corresponding.find(' (reprint author)')]
+        corresponding = Author(corresponding.strip())
+
         record['institutions'] = {}
         record['authors'] = []
 
@@ -126,6 +131,15 @@ class AffiliationsProcessor(base.Processor):
                 author = Author(a)
                 record['authors'].append((author, i))
 
+        match = corresponding.find_best_match([a for a, _ in record['authors']])
+        if not match:
+            print 'No corresponding author match found for:'
+            print repr(record['title'])
+        else:
+            for i, (a, _) in enumerate(record['authors']):
+                if a is match:
+                    record['corresponding_author'] = i
+                    break
         return record
 
 
