@@ -1,5 +1,4 @@
 import os
-import glob
 
 from irco import parser, tabular
 
@@ -7,7 +6,11 @@ from irco import parser, tabular
 def get_file_list(sources):
     for source in sources:
         if os.path.isdir(source):
-            for path in glob.glob(os.path.join(source, '*.txt')):
+            for path in sorted(os.listdir(source)):
+                _, ext = os.path.splitext(path)
+                if ext not in ('.txt', '.csv', '.tsv'):
+                    continue
+                path = os.path.join(source, path)
                 yield path
         elif os.path.isfile(source):
             yield source
