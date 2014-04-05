@@ -1,6 +1,6 @@
 import csv
 import re
-import urlparse
+import codecs
 
 from ftfy import fix_text
 
@@ -16,6 +16,9 @@ class LineGetter(object):
     def __iter__(self):
         for l in self.stream:
             self.value = l
+            l = l.encode('utf-8').rstrip('\r')
+            if l.endswith('\t'):
+                l = l[:-1]
             yield l
 
     def get(self):
@@ -38,7 +41,7 @@ class Tokenizer(base.Tokenizer):
     def tokenize(self, stream):
         self.stream = stream
         self.line = 2
-        self.header_row = next(self.stream)
+        self.header_row = next(self.stream).rstrip('\r') + '\n'
         self.stream.seek(0)
         self.lines = LineGetter(self.stream)
         self.reader = csv.DictReader(self.lines, delimiter='\t')
@@ -53,7 +56,7 @@ class Tokenizer(base.Tokenizer):
         row = next(self.reader)
         record = base.Record(
             self.FORMAT,
-            unicode(self.header_row + self.lines.get(), self.encoding)
+            self.header_row + self.lines.get()
         )
         record.source = (self.stream.name, self.line)
         record.update(row)
@@ -151,7 +154,12 @@ class AffiliationsProcessor(base.Processor):
         return record
 
 
-pipeline = base.Pipeline(
+class Pipeline(base.Pipeline):
+    def open(self, path):
+        return codecs.open(path, 'rb', encoding='utf_16')
+
+
+pipeline = Pipeline(
     Tokenizer(),
     Parser(),
     [

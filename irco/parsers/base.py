@@ -93,6 +93,9 @@ class Pipeline(object):
         except Exception as e:
             self._format_error(record, e)
 
+    def open(self, path):
+        return open(path)
+
     def process(self, stream):
         records = self.tokenizer.tokenize(stream)
         records = (self._parse_record(r) for r in records)

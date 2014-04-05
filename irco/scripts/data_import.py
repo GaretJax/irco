@@ -10,7 +10,7 @@ from irco.logging import get_logger
 
 def get_records(source, pipeline):
     for path in utils.get_file_list(source):
-        with open(path) as fh:
+        with pipeline.open(path) as fh:
             for record in pipeline.process(fh):
                 yield record
 

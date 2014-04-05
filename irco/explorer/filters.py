@@ -18,9 +18,14 @@ def init_app(app):
             delimiter = ','
             if fmt_tsv:
                 delimiter = '\t'
-            data = csv.DictReader(StringIO(val.encode('utf-8')), delimiter=delimiter)
-            data = next(data)
-            data = [(unicode(k, 'utf-8'), unicode(v, 'utf-8')) for k, v in data.iteritems()]
+            data = csv.reader(StringIO(val.encode('utf-8')), delimiter=delimiter)
+            try:
+                keys = next(data)
+                data = next(data)
+            except StopIteration:
+                return repr(val)
+            fields = zip(keys, data)
+            data = [(unicode(k, 'utf-8'), unicode(v, 'utf-8')) for k, v in fields]
             val = collections.OrderedDict(data)
             val = Markup(render_template('dict-table.html', table=val))
         return val
