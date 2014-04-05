@@ -111,6 +111,13 @@ class BaseValuesProcessor(base.Processor):
 class AffiliationsProcessor(base.Processor):
     splitter = re.compile(r'\[([^\]]+)] ([^;]+)(?:; |$)')
 
+    def initialize(self, pipeline):
+        self.pipeline = pipeline
+        pipeline.add_metric('corresponding_author_unmatched',
+                            'Records with unmatched corr. auth.')
+        pipeline.add_metric('corresponding_author_undefined',
+                            'Records with undefined corr. auth.')
+
     def process_record(self, record):
         record['institutions'] = {}
         record['authors'] = []
@@ -141,6 +148,7 @@ class AffiliationsProcessor(base.Processor):
 
             match = corresponding.find_best_match([a for a, _ in record['authors']])
             if not match:
+                self.pipeline.inc_metric('corresponding_author_unmatched')
                 print 'No corresponding author match found for:'
                 print repr(record['title'])
             else:
@@ -149,6 +157,7 @@ class AffiliationsProcessor(base.Processor):
                         record['corresponding_author'] = i
                         break
         else:
+            self.pipeline.inc_metric('corresponding_author_undefined')
             print 'No corresponding author defined for:'
             print repr(record['title'])
         return record
@@ -156,6 +165,7 @@ class AffiliationsProcessor(base.Processor):
 
 class Pipeline(base.Pipeline):
     def open(self, path):
+        self._opened_files += 1
         return codecs.open(path, 'rb', encoding='utf_16')
 
 

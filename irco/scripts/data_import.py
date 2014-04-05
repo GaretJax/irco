@@ -17,6 +17,8 @@ def get_records(source, pipeline):
 
 def import_records(engine, records):
     Session = sessionmaker(bind=engine)
+    imported = 0
+    ignored = 0
     for record in records:
         session = Session()
 
@@ -25,6 +27,7 @@ def import_records(engine, records):
                        .first())
 
         if publication:
+            ignored += 1
             continue
 
         publication = models.Publication(
@@ -72,6 +75,9 @@ def import_records(engine, records):
             session.add(affiliated_author)
 
         session.commit()
+        imported += 1
+
+    return imported, ignored
 
 
 def main():
@@ -95,5 +101,20 @@ def main():
 
     pipeline = pipelines[args.input_format]
     engine = create_engine(args.database, echo=args.verbose)
+    Session = sessionmaker(bind=engine)
+
+    count_before = Session().query(models.Publication).count()
     records = get_records(args.source, pipeline)
-    import_records(engine, records)
+    imported, ignored = import_records(engine, records)
+    count_after = Session().query(models.Publication).count()
+
+    pipeline.add_metric('imported_records', 'Records added to the database',
+                        imported)
+    pipeline.add_metric('ignored_records',
+                        'Ignored records (already imported)', ignored)
+    pipeline.add_metric('before_import', 'Records count before import',
+                        count_before)
+    pipeline.add_metric('after_import', 'Records count after import',
+                        count_after)
+    print
+    print pipeline.report()

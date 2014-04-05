@@ -1,6 +1,6 @@
 import abc
 import inspect
-
+import collections
 
 class IgnoreRecord(Exception):
     pass
@@ -24,6 +24,9 @@ class Parser(object):
 
 class Processor(object):
     __metaclass__ = abc.ABCMeta
+
+    def initialize(self, pipeline):
+        self.pipeline = pipeline
 
     @abc.abstractmethod
     def process_record(self, record):
@@ -58,6 +61,13 @@ class Pipeline(object):
         self.tokenizer = tokenizer
         self.parser = parser
         self.processors = processors
+        self._opened_files = 0
+        self._records = 0
+        self._processed = 0
+        self._metrics = collections.OrderedDict()
+
+        for p in processors:
+            p.initialize(self)
 
     def _format_error(self, record, e, processor=None):
         frm = inspect.trace()[-1]
@@ -88,20 +98,47 @@ class Pipeline(object):
             self._format_error(record, e, processor=processor)
 
     def _parse_record(self, record):
+        self._records += 1
         try:
             return self.parser.parse_record(record)
         except Exception as e:
             self._format_error(record, e)
 
+    def add_metric(self, key, name, val=0):
+        self._metrics[key] = [name, val]
+
+    def inc_metric(self, key):
+        self._metrics[key][1] += 1
+
     def open(self, path):
+        self._opened_files += 1
         return open(path)
+
+    def report(self):
+        fields = [
+            ('Processed files', self._opened_files),
+            ('Total records found', self._records),
+            ('Records ignored due to errors', self._records - self._processed),
+            ('Successfully processed records', self._processed),
+        ] + self._metrics.values()
+
+        l = max(len(f[0]) for f in fields)
+        s = ''
+        s += '-' * 80 + '\n'
+        for k, v in fields :
+            s += '{:>{}s}: {}\n'.format(k, l+1, v)
+        s += '-' * 80
+        return s
 
     def process(self, stream):
         records = self.tokenizer.tokenize(stream)
         records = (self._parse_record(r) for r in records)
         for p in self.processors:
             records = self._apply_processor(p, records)
-        return (r for r in records if r is not None)
+        for r in records:
+            if r is not None:
+                self._processed += 1
+                yield r
 
 
 class Record(dict):
