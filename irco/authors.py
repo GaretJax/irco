@@ -5,9 +5,22 @@ from collections import Counter
 class NamePart(object):
     def __init__(self, name):
         self.name = name
+        self._preprocess_abbr()
 
-    def is_abbreviated(self):
-        return self.name.endswith('.')
+    def _preprocess_abbr(self):
+        if self.name.endswith('.'):
+            self.is_abbreviated = True
+        elif self.name.isupper():
+            self.is_abbreviated = True
+            self.name = ''.join((c + '.' for c in self.name))
+        else:
+            self.is_abbreviated = False
+
+    def __len__(self):
+        if self.is_abbreviated:
+            return sum((c.isupper() for c in self.name))
+        else:
+            return len(self.name)
 
     def __unicode__(self):
         return self.name
@@ -30,6 +43,26 @@ class NamePart(object):
 
         return False
 
+    def __gt__(self, other):
+        if not isinstance(other, NamePart):
+            return NotImplemented
+        return self.name > other.name
+
+    def __lt__(self, other):
+        if not isinstance(other, NamePart):
+            return NotImplemented
+        return self.name < other.name
+
+    def __ge__(self, other):
+        if not isinstance(other, NamePart):
+            return NotImplemented
+        return self.name >= other.name
+
+    def __le__(self, other):
+        if not isinstance(other, NamePart):
+            return NotImplemented
+        return self.name <= other.name
+
     def isabbrof(self, other):
         pattern = re.escape(self.name).replace('\.', '.+')
         return re.match(pattern, other.name, re.I) is not None
@@ -38,8 +71,21 @@ class NamePart(object):
 class Author(unicode):
     def __init__(self, name):
         match = re.match(r'^([^\(]+)(?:\(([^@]+@[^ ]+)\))?$', name)
-        self.name, self.email = match.groups()
+        if not match:
+            match = re.match(r'^([^\(]+)\(', name)
+            self.name = match.group(0)
+            self.email = None
+        else:
+            self.name, self.email = match.groups()
         self.chunks = self.split_name(self.name)
+
+    @classmethod
+    def from_chunks(cls, name, email, chunks):
+        self = cls(name)
+        self.name = name
+        self.email = email
+        self.chunks = chunks
+        return self
 
     def split_name(self, name):
         chunks = []
@@ -59,16 +105,15 @@ class Author(unicode):
             elif parts[i] == '.':
                 parts[i-1] += parts[i]
                 del parts[i]
-            elif re.match(r'[A-Z]{2,}', parts[i]):
-                expanded = [p + '.' for p in parts[i]]
-                parts[i:i+1] = expanded
-                i += len(expanded)
+            #elif re.match(r'^[A-Z]{2,}$', parts[i]):
+            #    expanded = [p + '.' for p in parts[i]]
+            #    parts[i:i+1] = expanded
+            #    i += len(expanded)
             else:
                 i += 1
 
         parts = [NamePart(p) for p in parts]
         parts = sorted(parts, key=lambda p: p.name)
-        #print parts
         return tuple(parts)
 
     def __unicode__(self):
@@ -87,7 +132,7 @@ class Author(unicode):
         if len(self.chunks) != len(other.chunks):
             return False
 
-        self_abbr = Counter([c for c in self.chunks if c.is_abbreviated()])
+        self_abbr = Counter([c for c in self.chunks if c.is_abbreviated])
         self_not_abbr = Counter(self.chunks) - self_abbr
 
         other = Counter(other.chunks)
@@ -107,7 +152,7 @@ class Author(unicode):
             if c > 1:
                 set1[n1] = c - 1
             for n2 in set2:
-                if n1.is_abbreviated() ^ n2.is_abbreviated():
+                if n1.is_abbreviated ^ n2.is_abbreviated:
                     continue
                 if n1 == n2:
                     set2.subtract([n2])
@@ -132,14 +177,78 @@ class Author(unicode):
             if a == self:
                 return a
 
-        candidates = [a for a in authors if set(self.chunks) & set(a.chunks)]
+        candidates = [(a, self.match_score(a) - 10 * self.distance(a))
+                      for a in authors]
+        return max(candidates, key=lambda a: a[1])[0]
 
-        if len(candidates) == 1:
-            # Ok, we found it
-            return candidates[0]
-        elif candidates:
-            # Multiple matches left
-            pass
-        else:
-            # Zero matches
-            pass
+    def match_score(self, other):
+        score = 0
+
+        abbr = Counter([c for c in self.chunks if c.is_abbreviated])
+        full = Counter(self.chunks) - abbr
+
+        other_abbr = Counter([c for c in other.chunks if c.is_abbreviated])
+        other_full = Counter(other.chunks) - other_abbr
+
+        def substract(d1, d2):
+            common_sum = 0
+            for k1, count1 in d1.items():
+                for k2, count2 in d2.items():
+                    if k1 == k2:
+                        in_common = min(count1, count2)
+                        common_sum += in_common
+                        count1 -= in_common
+                        d2[k2] -= in_common
+                        if not count1:
+                            break
+                d1[k1] = count1
+            return common_sum
+
+        score += 10 * substract(full, other_full)
+        score += 10 * substract(abbr, other_abbr)
+        score += 5 * substract(full, other_abbr)
+        score += 5 * substract(abbr, other_full)
+
+        for d in (full, abbr, other_full, other_abbr):
+            for k in d.values():
+                assert k >= 0
+                score -= k * 5
+
+        return score
+
+    def distance(self, other):
+        p1 = ' '.join([c.name for c in sorted(self.chunks)])
+        p2 = ' '.join([c.name for c in sorted(other.chunks)])
+        l = len(self.name) * len(other.name)
+        return float(levenshtein(p1, p2) ** 2) / l
+
+    def fuzzy_matches(self, other):
+        r = re.compile(r'([aou])e')
+
+        sc = [NamePart(r.sub(r'\1', c.name)) for c in self.chunks]
+        oc = [NamePart(r.sub(r'\1', c.name)) for c in other.chunks]
+
+        self = Author.from_chunks(self.name, self.email, sc)
+        other = Author.from_chunks(other.name, other.email, oc)
+
+        return self == other
+
+
+def levenshtein(s1, s2):
+    if len(s1) < len(s2):
+        return levenshtein(s2, s1)
+
+    if len(s2) == 0:
+        return len(s1)
+
+    previous_row = xrange(len(s2) + 1)
+    for i, c1 in enumerate(s1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+
+    return previous_row[-1]
