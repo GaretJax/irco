@@ -19,6 +19,7 @@ REPLACEMENTS = {
     'Bosnia & Herceg': 'Bosnia and Herzegovina',
     'Byelarus': 'Belarus',
     'Neth Antilles': 'Netherlands Antilles',
+    'USA': 'United States',
 }
 
 
