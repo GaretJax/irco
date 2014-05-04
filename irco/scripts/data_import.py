@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import argparse
 
 from sqlalchemy import create_engine
@@ -27,6 +29,7 @@ def import_records(engine, records):
                        .first())
 
         if publication:
+            session.close()
             ignored += 1
             continue
 
@@ -65,7 +68,8 @@ def import_records(engine, records):
 
             affiliated_author = models.AffiliatedAuthor(
                 order=1,
-                is_corresponding=(record.get('corresponding_author', None) == i),
+                is_corresponding=(
+                    record.get('corresponding_author', None) == i),
                 unparsed_institution_name=raw,
                 institution=institution,
                 unparsed_person_name=name,
@@ -75,6 +79,7 @@ def import_records(engine, records):
             session.add(affiliated_author)
 
         session.commit()
+        session.close()
         imported += 1
 
     return imported, ignored
@@ -116,5 +121,5 @@ def main():
                         count_before)
     pipeline.add_metric('after_import', 'Records count after import',
                         count_after)
-    print
-    print pipeline.report()
+    print()
+    print(pipeline.report())
