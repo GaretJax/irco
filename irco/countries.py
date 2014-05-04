@@ -16,6 +16,9 @@ REPLACEMENTS = {
     'South Korea': 'Korea, Republic of',
     'U Arab Emirates': 'United Arab Emirates',
     'Vietnam': 'Viet Nam',
+    'Bosnia & Herceg': 'Bosnia and Herzegovina',
+    'Byelarus': 'Belarus',
+    'Neth Antilles': 'Netherlands Antilles',
 }
 
 
@@ -55,7 +58,7 @@ def get_institution_country(institution_name):
                     country.alpha3 in country_token.split(' ') or
                     country.alpha2 in country_token.split(' ')
                 ):
-                    log.warning('Fuzzy search for "{}" matched "{}"'.format(
+                    log.warning(u'Fuzzy search for "{}" matched "{}"'.format(
                         country_token, country.name))
                     break
             else:
