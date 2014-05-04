@@ -24,7 +24,7 @@ class Institution(Base):
     __tablename__ = 'institution'
 
     id = Column(Integer, primary_key=True)
-    name = Column(Unicode(120), nullable=False)
+    name = Column(Unicode(1024), nullable=False)
     country = Column(Unicode(100))
 
     def get_authors(self, session):
@@ -77,7 +77,7 @@ class Publication(Base):
     # Basic attributes
     id = Column(Integer, primary_key=True)
     type = Column(String(32), nullable=True)
-    title = Column(Unicode(120), nullable=False)
+    title = Column(Unicode(1024), nullable=False)
     year = Column(Integer)
     times_cited = Column(Integer, nullable=True)
 
@@ -112,7 +112,7 @@ class AffiliatedAuthor(Base):
     id = Column(Integer, primary_key=True)
     order = Column(Integer, nullable=False)
 
-    unparsed_institution_name = Column(Unicode(120))
+    unparsed_institution_name = Column(Unicode(1024))
     institution_id = Column(Integer, ForeignKey('institution.id'))
     institution = relationship(Institution, backref='affiliations')
 
