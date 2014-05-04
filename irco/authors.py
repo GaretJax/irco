@@ -1,5 +1,9 @@
 import re
+import logging
 from collections import Counter
+
+
+log = logging.get_logger()
 
 
 class NamePart(object):
@@ -175,7 +179,10 @@ class Author(unicode):
 
         candidates = [(a, self.match_score(a) - 10 * self.distance(a))
                       for a in authors]
-        return max(candidates, key=lambda a: a[1])[0]
+        match = max(candidates, key=lambda a: a[1])[0]
+        log.warning('Fuzzy match search for "{}" matched "{}"'.format(
+            self.name, match.name))
+        return match
 
     def match_score(self, other):
         score = 0
@@ -217,17 +224,6 @@ class Author(unicode):
         p2 = ' '.join([c.name for c in sorted(other.chunks)])
         l = len(self.name) * len(other.name)
         return float(levenshtein(p1, p2) ** 2) / l
-
-    def fuzzy_matches(self, other):
-        r = re.compile(r'([aou])e')
-
-        sc = [NamePart(r.sub(r'\1', c.name)) for c in self.chunks]
-        oc = [NamePart(r.sub(r'\1', c.name)) for c in other.chunks]
-
-        self = Author.from_chunks(self.name, self.email, sc)
-        other = Author.from_chunks(other.name, other.email, oc)
-
-        return self == other
 
 
 def levenshtein(s1, s2):
