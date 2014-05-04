@@ -113,6 +113,7 @@ class AffiliationsProcessor(base.Processor):
 
     def initialize(self, pipeline):
         self.pipeline = pipeline
+        self.unmatched_authors = open('unmatched_authors.log', 'w')
         pipeline.add_metric('corresponding_author_unmatched',
                             'Records with unmatched corr. auth.')
         pipeline.add_metric('corresponding_author_undefined',
@@ -146,11 +147,17 @@ class AffiliationsProcessor(base.Processor):
             corresponding = corresponding[:corresponding.find(' (reprint author)')]
             corresponding = Author(corresponding.strip())
 
-            match = corresponding.find_best_match([a for a, _ in record['authors']])
+            match = corresponding.find_best_match([a[0] for a in record['authors']])
             if not match:
                 self.pipeline.inc_metric('corresponding_author_unmatched')
+                print '-' * 80
                 print 'No corresponding author match found for:'
-                print repr(record['title'])
+                print '  ', repr(record['title']), '/', repr(corresponding.name)
+                names = (a[0].name for a in record['authors'])
+                import pprint
+                pprint.pprint((corresponding.name, 0, tuple(names)),
+                              self.unmatched_authors)
+                print '-' * 80
             else:
                 for i, (a, _) in enumerate(record['authors']):
                     if a is match:
@@ -158,8 +165,9 @@ class AffiliationsProcessor(base.Processor):
                         break
         else:
             self.pipeline.inc_metric('corresponding_author_undefined')
-            print 'No corresponding author defined for:'
-            print repr(record['title'])
+            record['corresponding_author'] = 0
+            print (u'Undefined corresponding author for "{}", selecting "{}"'
+                   .format(record['title'], record['authors'][0][0].name))
         return record
 
 
