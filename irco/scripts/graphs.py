@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker, aliased, joinedload
 from sqlalchemy.sql.expression import true, false
 
 from irco import graphs, models
+from irco.logging import sentry
 
 
 def write(fh, graph, format=None):
@@ -27,6 +28,15 @@ def main():
     argparser.add_argument('output', default='-', nargs='?')
 
     args = argparser.parse_args()
+
+    sentry.context.merge({
+        'tags': {
+            'command': 'irco-graph',
+            'graph_type': args.graph_type,
+        },
+        'extra': {'parsed_arguments': args.__dict__}
+    })
+
     graph_factory = graphs.get_graph(args.graph_type)
 
     engine = create_engine(args.database, echo=args.verbose)

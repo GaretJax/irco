@@ -7,14 +7,18 @@ from sqlalchemy.orm import sessionmaker
 
 from irco import models, utils, countries
 from irco.parsers import scopus, compendex, wos
-from irco.logging import get_logger
+from irco.logging import get_logger, sentry
 
 
 def get_records(source, pipeline):
     for path in utils.get_file_list(source):
+        sentry.extra_context({
+            'input_file': path,
+        })
         with pipeline.open(path) as fh:
             for record in pipeline.process(fh):
                 yield record
+        del sentry.context['extra']['input_file']
 
 
 def import_records(engine, records):
@@ -101,6 +105,16 @@ def main():
     argparser.add_argument('database')
 
     args = argparser.parse_args()
+
+    sentry.context.merge({
+        'tags': {
+            'command': 'irco-import',
+            'input_format': args.input_format,
+        },
+        'extra': {
+            'parsed_arguments': args.__dict__,
+        }
+    })
 
     log.info('arguments_parsed', args=args)
 
