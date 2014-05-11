@@ -2,12 +2,13 @@ include entry-points.ini
 include requirements.txt requirements-dev.txt
 include AUTHORS LICENSE NEWS
 
-graft docs
+prune docs
 
 graft irco/explorer/static
 graft irco/explorer/templates
 prune irco/explorer/assets
 
+graft irco/test
 include irco/default-settings.ini
 
 exclude Gemfile Gemfile.lock Guardfile fabfile.py
