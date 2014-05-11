@@ -11,6 +11,7 @@ Welcome to IRCO's documentation!
 
    installation
    quickstart
+   configuration
    formats
    graphs/index
    shell
