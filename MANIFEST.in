@@ -8,4 +8,6 @@ graft irco/explorer/static
 graft irco/explorer/templates
 prune irco/explorer/assets
 
+include irco/default-settings.ini
+
 exclude Gemfile Gemfile.lock Guardfile fabfile.py

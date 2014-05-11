@@ -1,11 +1,12 @@
 *.egg-info
 *.pyc
 *.log
+/irco.ini
 /.sass-cache
 /build
 /dist
 /testdata
-test.db
+/*.db
 /docs/_build
 /irco/explorer/static/styles
 /irco/explorer/static/scripts/*.js
