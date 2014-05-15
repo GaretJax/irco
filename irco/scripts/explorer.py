@@ -1,7 +1,7 @@
 import argparse
 
 from irco.explorer import app, database, filters
-from irco.logging import sentry
+#from irco.logging import sentry
 
 
 def main():
@@ -13,10 +13,10 @@ def main():
 
     args = argparser.parse_args()
 
-    sentry.context.merge({
-        'tags': {'command': 'irco-explorer'},
-        'extra': {'parsed_arguments': args.__dict__}
-    })
+    #sentry.context.merge({
+    #    'tags': {'command': 'irco-explorer'},
+    #    'extra': {'parsed_arguments': args.__dict__}
+    #})
 
     app.config['DATABASE'] = args.database
     database.init_app(app)
