@@ -35,7 +35,8 @@ def create(session, publications):
         g.add_nodes_from(publication_countries)
         papers_count.update(publication_countries)
 
-        collaborations = list(itertools.combinations(publication_countries, 2))
+        collaborations = list(itertools.combinations(
+            sorted(publication_countries), 2))
         collaborations_count.update(collaborations)
         g.add_edges_from(collaborations)
 
