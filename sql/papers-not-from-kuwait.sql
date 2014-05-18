@@ -1,4 +1,7 @@
-﻿select p.id, p.title
+﻿-- Selects a list of publications in which no author as an affiliation with a
+-- kuwaiti institution.
+
+select p.id, p.title
 from publication as p
 where p.id not in (
 	select distinct p.id
@@ -6,4 +9,4 @@ where p.id not in (
 	join affiliated_author as a on a.publication_id = p.id
 	join institution as i on i.id = a.institution_id
 	where i.country = 'Kuwait'
-)
+);
