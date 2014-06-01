@@ -95,7 +95,7 @@ def main():
     digits = len(str(args.count))
 
     for i, start in enumerate(range(0, args.count, 500)):
-        dest = os.path.join(args.output, 'savedrecs-{}.csv'.format(i))
+        dest = os.path.join(args.output, 'savedrecs-{:05d}.csv'.format(i))
         end = min(args.count, start + MAX_RECORDS)
         print '{:{}d} - {:{}d} => {}'.format(start + 1, digits, end, digits, dest)
         with open(dest, 'wb') as fh:
