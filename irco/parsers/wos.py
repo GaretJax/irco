@@ -174,7 +174,7 @@ class AffiliationsProcessor(base.Processor):
 class Pipeline(base.Pipeline):
     def open(self, path):
         self._opened_files += 1
-        return codecs.open(path, 'rb', encoding='utf_16')
+        return codecs.open(path, 'rb', encoding='utf_8')
 
 
 pipeline = Pipeline(
