@@ -1,3 +1,4 @@
+from __future__ import print_function
 import argparse
 import os
 import requests
@@ -8,9 +9,9 @@ DOWNLOAD_URL = 'http://apps.webofknowledge.com/OutboundService.do?action=go'
 MAX_RECORDS = 500
 
 
-#http://wokinfo.com  -- Subscriber login >
-#http://sub3.webofknowledge.com/error/Error?PathInfo=%2F&Alias=WOK5&Domain=.webofknowledge.com&Src=IP&RouterURL=http%3A%2F%2Fwww.webofknowledge.com%2F&Error=IPError
-#requests.get('http://apps.webofknowledge.com/UA_GeneralSearch_input.do?product=UA&search_mode=GeneralSearch&SID=Z18u1itzh2szEsmsje8&preferencesSaved=')
+# http://wokinfo.com  -- Subscriber login >
+# http://sub3.webofknowledge.com/error/Error?PathInfo=%2F&Alias=WOK5&Domain=.webofknowledge.com&Src=IP&RouterURL=http%3A%2F%2Fwww.webofknowledge.com%2F&Error=IPError
+# requests.get('http://apps.webofknowledge.com/UA_GeneralSearch_input.do?product=UA&search_mode=GeneralSearch&SID=Z18u1itzh2szEsmsje8&preferencesSaved=')
 
 
 def download(search_id, start, stop, output_stream):
@@ -67,8 +68,6 @@ def download(search_id, start, stop, output_stream):
 
     gen = r.iter_content(1024)
 
-    #first_chunk = next(gen)
-
     for chunk in gen:
         output_stream.write(chunk)
 
@@ -97,6 +96,7 @@ def main():
     for i, start in enumerate(range(0, args.count, 500)):
         dest = os.path.join(args.output, 'savedrecs-{:05d}.csv'.format(i))
         end = min(args.count, start + MAX_RECORDS)
-        print '{:{}d} - {:{}d} => {}'.format(start + 1, digits, end, digits, dest)
+        print('{:{}d} - {:{}d} => {}'.format(
+            start + 1, digits, end, digits, dest))
         with open(dest, 'wb') as fh:
             download(args.search_id, start + 1, end, fh)
