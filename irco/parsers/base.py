@@ -80,10 +80,10 @@ class Pipeline(object):
         if len(title) > 50:
             title = title[:50] + '...'
         if processor:
-            print '=== ERROR WHILE PROCESSING RECORD =============================================='
+            print '=== ERROR WHILE PROCESSING RECORD ' + '=' * 45
             print ' Processor class: {}'.format(processor.__class__.__name__)
         else:
-            print '=== ERROR WHILE PARSING RECORD ================================================='
+            print '=== ERROR WHILE PARSING RECORD ===' + '=' * 45
         print '          Module: {}:{}'.format(mod.__name__, line)
         print '       Exception: {}'.format(type(e).__name__)
         print '         Message: {}'.format(e)
