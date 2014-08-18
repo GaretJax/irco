@@ -1,6 +1,8 @@
+from __future__ import print_function
+
 import csv
 import re
-import codecs
+import pprint
 
 from ftfy import fix_text
 
@@ -66,7 +68,7 @@ class Tokenizer(base.Tokenizer):
 
     def _get_key(self, k):
         k = fix_text(unicode(k, self.encoding))
-        k = str(k)
+        k = str(k.encode('ascii', 'ignore'))
         k = self.FIELDS.get(k, k)
         return k
 
@@ -115,53 +117,77 @@ class AffiliationsProcessor(base.Processor):
         self.pipeline = pipeline
         self.unmatched_authors = open('unmatched_authors.log', 'w')
         pipeline.add_metric('corresponding_author_unmatched',
-                            'Records with unmatched corr. auth.')
+                            'Records wixth unmatched corr. auth.')
         pipeline.add_metric('corresponding_author_undefined',
                             'Records with undefined corr. auth.')
+        pipeline.add_metric('ambiguous_author_affiliations',
+                            'Records with ambiguous auth. aff.')
 
     def process_record(self, record):
-        record['institutions'] = {}
+        record['institutions'] = []
         record['authors'] = []
 
         affiliations = self.splitter.findall(
             record['authors_with_affiliations'].strip())
 
         if not affiliations:
-            affiliations = [
-                (record['AF'], record['authors_with_affiliations'])
-            ]
+            aut = record['AF'].split('; ')
+            aff = record['authors_with_affiliations'].split('; ')
+            if len(aut) == len(aff):
+                affiliations = list(zip(aut, aff))
+            elif len(aff) == 1:
+                affiliations = [(a, aff[0]) for a in aut]
+            else:
+                self.pipeline.inc_metric('ambiguous_author_affiliations')
+                print('-' * 80)
+                print(u'Ambiguous author affiliations for "{title}":'.format(
+                    **record))
+                print(' Authors:')
+                for a in aut:
+                    print('  * {}'.format(a))
+                print(' Affiliations:')
+                for a in aff:
+                    print('  * {}'.format(a))
+                print('-' * 80)
+                return None
 
         # TODO: Some authors could have two affiliations! This should be
         # checked here and a warning raised.
 
         for i, (authors, institution) in enumerate(affiliations):
-            record['institutions'][i] = institution
+            record['institutions'].append(institution)
 
             for a in authors.split('; '):
                 author = Author(a)
                 record['authors'].append((author, i))
 
-        corresponding = record['RP']
-
-        if corresponding:
-            corresponding = corresponding[:corresponding.find(' (reprint author)')]
+        if record['RP']:
+            t = ' (reprint author)'
+            corresponding = record['RP'][:record['RP'].find(t)]
             corresponding = Author(corresponding.strip())
+            t += ', '
+            institution = record['RP'][record['RP'].find(t) + len(t):]
+            record['institutions'].append(institution)
 
-            match = corresponding.find_best_match([a[0] for a in record['authors']])
+            match = corresponding.find_best_match(
+                [a[0] for a in record['authors']])
             if not match:
                 self.pipeline.inc_metric('corresponding_author_unmatched')
-                print '-' * 80
-                print 'No corresponding author match found for:'
-                print '  ', repr(record['title']), '/', repr(corresponding.name)
+                print('-' * 80)
+                print('No corresponding author match found for:')
+                print('  {!r}/{!r}'.format(record['title'],
+                                           corresponding.name))
                 names = (a[0].name for a in record['authors'])
-                import pprint
                 pprint.pprint((corresponding.name, 0, tuple(names)),
                               self.unmatched_authors)
-                print '-' * 80
+                print('-' * 80)
+                return None
             else:
-                for i, (a, _) in enumerate(record['authors']):
+                for i, (a, institution_id) in enumerate(record['authors']):
                     if a is match:
                         record['corresponding_author'] = i
+                        record['authors'][i] = (
+                            a, len(record['institutions']) - 1)
                         break
         else:
             self.pipeline.inc_metric('corresponding_author_undefined')
@@ -171,17 +197,13 @@ class AffiliationsProcessor(base.Processor):
         return record
 
 
-class Pipeline(base.Pipeline):
-    def open(self, path):
-        self._opened_files += 1
-        return codecs.open(path, 'rb', encoding='utf_8')
-
-
-pipeline = Pipeline(
-    Tokenizer(),
-    Parser(),
-    [
-        BaseValuesProcessor(),
-        AffiliationsProcessor(),
-    ]
-)
+def pipeline(encoding):
+    return base.Pipeline(
+        Tokenizer(encoding),
+        Parser(encoding),
+        [
+            BaseValuesProcessor(),
+            AffiliationsProcessor(),
+        ],
+        encoding,
+    )

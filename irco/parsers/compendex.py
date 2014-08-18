@@ -87,12 +87,13 @@ class InstitutionsProcessor(base.ValueProcessor):
         return {int(k): v for k, v in institutions}
 
 
-pipeline = base.Pipeline(
-    Tokenizer(),
-    Parser(),
-    [
-        BaseValuesProcessor(),
-        AuthorsProcessor(),
-        InstitutionsProcessor(),
-    ]
-)
+def pipeline(encoding):
+    return base.Pipeline(
+        Tokenizer(),
+        Parser(),
+        [
+            BaseValuesProcessor(),
+            AuthorsProcessor(),
+            InstitutionsProcessor(),
+        ]
+    )

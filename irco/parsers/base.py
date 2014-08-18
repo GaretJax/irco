@@ -1,6 +1,8 @@
 import abc
 import inspect
 import collections
+import codecs
+
 
 class IgnoreRecord(Exception):
     pass
@@ -57,10 +59,11 @@ class ValueProcessor(Processor):
 
 
 class Pipeline(object):
-    def __init__(self, tokenizer, parser, processors):
+    def __init__(self, tokenizer, parser, processors, encoding='utf8'):
         self.tokenizer = tokenizer
         self.parser = parser
         self.processors = processors
+        self.encoding = encoding
         self._opened_files = 0
         self._records = 0
         self._processed = 0
@@ -112,7 +115,7 @@ class Pipeline(object):
 
     def open(self, path):
         self._opened_files += 1
-        return open(path)
+        return codecs.open(path, 'rb', encoding=self.encoding)
 
     def report(self):
         fields = [
@@ -125,7 +128,7 @@ class Pipeline(object):
         l = max(len(f[0]) for f in fields)
         s = ''
         s += '-' * 80 + '\n'
-        for k, v in fields :
+        for k, v in fields:
             s += '{:>{}s}: {}\n'.format(k, l+1, v)
         s += '-' * 80
         return s

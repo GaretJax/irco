@@ -114,11 +114,12 @@ class AffiliationsProcessor(base.Processor):
         return record
 
 
-pipeline = base.Pipeline(
-    Tokenizer(),
-    Parser(),
-    [
-        BaseValuesProcessor(),
-        AffiliationsProcessor(),
-    ]
-)
+def pipeline(encoding):
+    return base.Pipeline(
+        Tokenizer(),
+        Parser(),
+        [
+            BaseValuesProcessor(),
+            AffiliationsProcessor(),
+        ]
+    )
