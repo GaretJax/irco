@@ -50,7 +50,7 @@ def import_records(engine, records):
 
         institutions = {}
 
-        for k, v in record['institutions'].iteritems():
+        for k, v in enumerate(record['institutions']):
             try:
                 country = countries.get_institution_country(v)
             except countries.CountryNotFound:

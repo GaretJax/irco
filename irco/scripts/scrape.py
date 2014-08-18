@@ -14,6 +14,10 @@ MAX_RECORDS = 500
 # requests.get('http://apps.webofknowledge.com/UA_GeneralSearch_input.do?product=UA&search_mode=GeneralSearch&SID=Z18u1itzh2szEsmsje8&preferencesSaved=')
 
 
+class AbortDownload(Exception):
+    pass
+
+
 def download(search_id, start, stop, output_stream):
     r = requests.post(DOWNLOAD_URL, stream=True, data={
         'displayCitedRefs': 'true',
@@ -66,10 +70,21 @@ def download(search_id, start, stop, output_stream):
         # 'markTo': '10',
     })
 
+    if r.headers['content-type'].split(';')[0] != 'text/plain':
+        raise AbortDownload()
+
     gen = r.iter_content(1024)
 
     for chunk in gen:
         output_stream.write(chunk)
+
+
+def iterpages(per_page, start=0):
+    i = 0
+    while True:
+        yield i, start
+        start += per_page
+        i += 1
 
 
 def main():
@@ -78,7 +93,7 @@ def main():
     argparser = argparse.ArgumentParser('irco-scrape')
     argparser.add_argument('search_id')
     argparser.add_argument('output')
-    argparser.add_argument('count', type=int)
+    argparser.add_argument('count', type=int, nargs='?', help='Deprecated')
     args = argparser.parse_args()
 
     sentry.context.merge({
@@ -91,12 +106,16 @@ def main():
     if not os.path.exists(args.output):
         os.makedirs(args.output)
 
-    digits = len(str(args.count))
+    digits = 5
 
-    for i, start in enumerate(range(0, args.count, MAX_RECORDS)):
+    for i, start in iterpages(MAX_RECORDS):
         dest = os.path.join(args.output, 'savedrecs-{:05d}.csv'.format(i))
-        end = min(args.count, start + MAX_RECORDS)
+        end = start + MAX_RECORDS
         print('{:{}d} - {:{}d} => {}'.format(
             start + 1, digits, end, digits, dest))
         with open(dest, 'wb') as fh:
+            try:
             download(args.search_id, start + 1, end, fh)
+            except AbortDownload:
+                break
+    os.remove(dest)
