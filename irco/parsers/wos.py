@@ -167,7 +167,6 @@ class AffiliationsProcessor(base.Processor):
             corresponding = Author(corresponding.strip())
             t += ', '
             institution = record['RP'][record['RP'].find(t) + len(t):]
-            record['institutions'].append(institution)
 
             match = corresponding.find_best_match(
                 [a[0] for a in record['authors']])
@@ -186,8 +185,11 @@ class AffiliationsProcessor(base.Processor):
                 for i, (a, institution_id) in enumerate(record['authors']):
                     if a is match:
                         record['corresponding_author'] = i
-                        record['authors'][i] = (
-                            a, len(record['institutions']) - 1)
+                        curr_inst = record['institutions'][institution_id]
+                        if institution != curr_inst:
+                            record['institutions'].append(institution)
+                            record['authors'][i] = (
+                                a, len(record['institutions']) - 1)
                         break
         else:
             self.pipeline.inc_metric('corresponding_author_undefined')
