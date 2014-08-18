@@ -13,6 +13,13 @@ MAX_RECORDS = 500
 # http://sub3.webofknowledge.com/error/Error?PathInfo=%2F&Alias=WOK5&Domain=.webofknowledge.com&Src=IP&RouterURL=http%3A%2F%2Fwww.webofknowledge.com%2F&Error=IPError
 # requests.get('http://apps.webofknowledge.com/UA_GeneralSearch_input.do?product=UA&search_mode=GeneralSearch&SID=Z18u1itzh2szEsmsje8&preferencesSaved=')
 
+# rurl http%3A%2F%2Fapps.webofknowledge.com%2Fsummary.do%3FSID%3DQ2XqL9bU5LfuKsDzQOA%26product%3DUA%26qid%3D2%26search_mode%3DGeneralSearch
+# mark_id UDB
+# view_name UA-summary
+# selectedIds 1;2;3;4;5;6;7;8;9;10
+# count_new_items_marked 0
+# value(record_select_type) pagerecords
+# fields_selection AUTHORSIDENTIFIERS ISSN_ISBN CITTIMES SOURCE TITLE AUTHORS
 
 class AbortDownload(Exception):
     pass
@@ -54,12 +61,13 @@ def download(search_id, start, stop, output_stream):
         ]),
         'mark_from': start,
         'mark_to': stop,
+        'mark_id': 'UDB',
         'save_options': 'tabMacUTF8',
+        'product': 'UA',
 
         # Unused fields
         # 'selectedIds': '',
         # 'viewType': 'summary',
-        # 'mark_id': 'WOS',
         # 'search_mode': 'GeneralSearch',
         # 'locale': 'en_US',
         # 'view_name': 'WOS-summary',
@@ -115,7 +123,7 @@ def main():
             start + 1, digits, end, digits, dest))
         with open(dest, 'wb') as fh:
             try:
-            download(args.search_id, start + 1, end, fh)
+                download(args.search_id, start + 1, end, fh)
             except AbortDownload:
                 break
     os.remove(dest)
