@@ -50,7 +50,7 @@ def watchdocs():
     """
     Watch the docs directory and rebuild on change.
     """
-    local('sphinx-autobuild -p 5000 docs docs/_build/html')
+    local('sphinx-autobuild -p 4800 docs docs/_build/html')
 
 
 @task
