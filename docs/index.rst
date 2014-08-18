@@ -15,6 +15,7 @@ Welcome to IRCO's documentation!
    formats
    graphs/index
    shell
+   downloading
    backup
 
 
@@ -33,4 +34,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
