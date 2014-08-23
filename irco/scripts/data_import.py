@@ -37,7 +37,7 @@ def import_records(engine, records):
             ignored += 1
             continue
 
-        ambiguous = record.get('has_ambiguous_affiliations', False)
+        ambiguous = record.get('ambiguous_affiliations', False)
 
         publication = models.Publication(
             year=record['year'],
