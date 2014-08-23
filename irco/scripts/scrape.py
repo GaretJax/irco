@@ -64,18 +64,18 @@ def download(search_id, start, stop, output_stream):
         'mark_id': 'UDB',
         'save_options': 'tabMacUTF8',
         'product': 'UA',
+        # 'locale': 'en_US',
+        # 'view_name': 'WOS-summary',
+        # 'search_mode': 'GeneralSearch',
 
         # Unused fields
         # 'selectedIds': '',
         # 'viewType': 'summary',
-        # 'search_mode': 'GeneralSearch',
-        # 'locale': 'en_US',
-        # 'view_name': 'WOS-summary',
         # 'sortBy': 'PY.D;LD.D;SO.A;VL.D;PG.A;AU.A',
         # 'count_new_items_marked': '0',
         # 'value(record_select_type)': 'range',
-        # 'markFrom': '1',
-        # 'markTo': '10',
+        'markFrom': start,
+        'markTo': stop,
     })
 
     if r.headers['content-type'].split(';')[0] != 'text/plain':
