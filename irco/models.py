@@ -80,6 +80,7 @@ class Publication(Base):
     title = Column(Unicode(1024), nullable=False)
     year = Column(Integer)
     times_cited = Column(Integer, nullable=True)
+    has_ambiguous_affiliations = Column(Boolean, nullable=False, default=False)
 
     # Relationships
     def get_institutions(self, session):
