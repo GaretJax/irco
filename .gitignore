@@ -1,6 +1,7 @@
 *.egg-info
 *.pyc
 *.log
+/alembic.ini
 /irco.ini
 /.sass-cache
 /build
