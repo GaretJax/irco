@@ -103,8 +103,10 @@ def main():
 
     argparser = argparse.ArgumentParser('irco-import')
     argparser.add_argument('-v', '--verbose', action='store_true')
-    argparser.add_argument('-i', '--input-format', choices=pipelines)
+    argparser.add_argument('-i', '--input-format', choices=pipelines, required=True)
     argparser.add_argument('-e', '--encoding', default='utf8')
+    argparser.add_argument('-a', '--include-ambiguous-affiliations',
+                           action='store_true', dest='ambiguous')
     argparser.add_argument('source', nargs='+')
     argparser.add_argument('database')
 
@@ -122,7 +124,8 @@ def main():
 
     log.info('arguments_parsed', args=args)
 
-    pipeline = pipelines[args.input_format](encoding=args.encoding)
+    pipeline = pipelines[args.input_format](encoding=args.encoding,
+                                            include_ambiguous=args.ambiguous)
     engine = create_engine(args.database, echo=args.verbose)
     Session = sessionmaker(bind=engine)
 
