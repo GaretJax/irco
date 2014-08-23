@@ -113,6 +113,9 @@ class BaseValuesProcessor(base.Processor):
 class AffiliationsProcessor(base.Processor):
     splitter = re.compile(r'\[([^\]]+)] ([^;]+)(?:; |$)')
 
+    def __init__(self, include_ambiguous):
+        self.include_ambiguous_affiliations = include_ambiguous
+
     def initialize(self, pipeline):
         self.pipeline = pipeline
         self.unmatched_authors = open('unmatched_authors.log', 'w')
@@ -149,7 +152,13 @@ class AffiliationsProcessor(base.Processor):
                 for a in aff:
                     print('  * {}'.format(a))
                 print('-' * 80)
-                return None
+                if self.include_ambiguous_affiliations:
+                    # Set all author affiliations to the first institution in
+                    # the list, and set the ambiguous flag...
+                    record['ambiguous_affiliations'] = True
+                    affiliations = [(a, aff[0]) for a in aut]
+                else:
+                    return None
 
         # TODO: Some authors could have two affiliations! This should be
         # checked here and a warning raised.
@@ -199,13 +208,14 @@ class AffiliationsProcessor(base.Processor):
         return record
 
 
-def pipeline(encoding):
+def pipeline(encoding, **kwargs):
+    include_ambiguous = kwargs.pop('include_ambiguous', False)
     return base.Pipeline(
         Tokenizer(encoding),
         Parser(encoding),
         [
             BaseValuesProcessor(),
-            AffiliationsProcessor(),
+            AffiliationsProcessor(include_ambiguous=include_ambiguous),
         ],
         encoding,
     )

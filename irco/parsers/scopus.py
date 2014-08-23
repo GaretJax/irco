@@ -114,7 +114,7 @@ class AffiliationsProcessor(base.Processor):
         return record
 
 
-def pipeline(encoding):
+def pipeline(encoding, **kwargs):
     return base.Pipeline(
         Tokenizer(),
         Parser(),

@@ -87,7 +87,7 @@ class InstitutionsProcessor(base.ValueProcessor):
         return {int(k): v for k, v in institutions}
 
 
-def pipeline(encoding):
+def pipeline(encoding, **kwargs):
     return base.Pipeline(
         Tokenizer(),
         Parser(),

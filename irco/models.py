@@ -1,5 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Unicode, ForeignKey, Text, Boolean
+from sqlalchemy import Column, Integer, String, Unicode, ForeignKey, Text
+from sqlalchemy import Boolean
 from sqlalchemy.orm import relationship, object_session
 from sqlalchemy.sql.expression import ClauseElement
 

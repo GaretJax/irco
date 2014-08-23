@@ -37,6 +37,8 @@ def import_records(engine, records):
             ignored += 1
             continue
 
+        ambiguous = record.get('has_ambiguous_affiliations', False)
+
         publication = models.Publication(
             year=record['year'],
             title=record['title'],
@@ -45,6 +47,7 @@ def import_records(engine, records):
             unique_source_id=record.unique_source_id,
             unparsed_record_format=record.format,
             unparsed_record_value=record.raw_value,
+            has_ambiguous_affiliations=ambiguous,
         )
         session.add(publication)
 
