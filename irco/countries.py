@@ -34,7 +34,7 @@ class CountryNotFound(Exception):
 
 
 def get_institution_country(institution_name):
-    tokens = institution_name.split(', ')
+    tokens = institution_name.strip('., ').split(', ')
     country_token = tokens[-1]
 
     if country_token in REPLACEMENTS:
