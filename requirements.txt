@@ -3,7 +3,7 @@ Jinja2==2.7.1
 Mako==1.0.0
 MarkupSafe==0.18
 SQLAlchemy==0.9.3
-Werkzeug==0.9.4
+Werkzeug==0.15.3
 ftfy==3.0.4
 itsdangerous==0.23
 networkx==1.7
